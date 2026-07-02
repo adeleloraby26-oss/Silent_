@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — SILENT_ Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div id="sidebar-root"></div>
+
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Website Settings</span>
+    <div class="admin-topbar__actions">
+      <button class="admin-btn admin-btn--primary" id="save-settings-btn">Save All Changes</button>
+    </div>
+  </header>
+
+  <div class="admin-content">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+      <!-- Social Links -->
+      <div class="admin-card">
+        <h2 class="admin-card__title">Social Media Links</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="admin-field"><label>Instagram URL</label><input type="url" id="instagram_url" class="admin-input" placeholder="https://instagram.com/silent"></div>
+          <div class="admin-field"><label>Twitter / X URL</label><input type="url" id="twitter_url" class="admin-input" placeholder="https://x.com/silent"></div>
+          <div class="admin-field"><label>TikTok URL</label><input type="url" id="tiktok_url" class="admin-input" placeholder="https://tiktok.com/@silent"></div>
+          <div class="admin-field"><label>Facebook URL</label><input type="url" id="facebook_url" class="admin-input" placeholder="https://facebook.com/silent"></div>
+          <div class="admin-field"><label>WhatsApp Business URL</label><input type="url" id="whatsapp_url" class="admin-input" placeholder="https://wa.me/1234567890"></div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="admin-card">
+        <h2 class="admin-card__title">Contact Information</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="admin-field"><label>Support Email</label><input type="email" id="support_email" class="admin-input" placeholder="support@silent.com"></div>
+          <div class="admin-field"><label>Phone Number</label><input type="tel" id="phone" class="admin-input" placeholder="+1 000 000 0000"></div>
+          <div class="admin-field"><label>Store Address</label><textarea id="store_address" class="admin-input admin-textarea" placeholder="123 Fashion Ave, New York, NY"></textarea></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="admin-card">
+        <h2 class="admin-card__title">Footer</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="admin-field"><label>Footer Text</label><input type="text" id="footer_text" class="admin-input" placeholder="All rights reserved."></div>
+        </div>
+      </div>
+
+      <!-- Drop Countdown -->
+      <div class="admin-card">
+        <h2 class="admin-card__title">Next Drop Countdown</h2>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="admin-field"><label>Next Drop Date & Time</label><input type="datetime-local" id="next_drop_date" class="admin-input"></div>
+          <p style="font-size:11px;color:rgba(255,255,255,0.3);">Set a future date to show the homepage countdown. Leave blank to hide it.</p>
+        </div>
+      </div>
+
+      <!-- Hero Banner -->
+      <div class="admin-card" style="grid-column:1/-1;">
+        <h2 class="admin-card__title">Homepage Hero Banner</h2>
+        <div class="admin-upload-area" id="hero-upload-area">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" style="margin:0 auto;display:block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Click or drag to upload hero banner image (recommended 1920×1080)</p>
+          <input type="file" id="hero-upload-input" accept="image/*">
+        </div>
+        <div id="hero-preview" style="margin-top:16px;"></div>
+      </div>
+
+      <!-- Logo -->
+      <div class="admin-card" style="grid-column:1/-1;">
+        <h2 class="admin-card__title">Brand Logo</h2>
+        <div class="admin-upload-area" id="logo-upload-area">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" style="margin:0 auto;display:block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Click or drag to upload logo (SVG or PNG, transparent background recommended)</p>
+          <input type="file" id="logo-upload-input" accept="image/*">
+        </div>
+        <div id="logo-preview" style="margin-top:16px;"></div>
+      </div>
+    </div>
+
+    <p id="settings-saved-msg" style="display:none;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(80,200,120,0.8);margin-top:16px;">✓ Settings saved successfully</p>
+  </div>
+</div>
+
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('settings');
+  const ok = await requireAdmin();
+  if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  const fields = ['instagram_url','twitter_url','tiktok_url','facebook_url','whatsapp_url','support_email','phone','store_address','footer_text','next_drop_date'];
+
+  // Load existing settings
+  async function loadSettings() {
+    const { data } = await supabase.from('website_settings').select('key, value');
+    const map = Object.fromEntries((data || []).map(r => [r.key, r.value]));
+    fields.forEach(key => {
+      const el = document.getElementById(key);
+      if (el && map[key]) el.value = map[key];
+    });
+
+    if (map.hero_banner) {
+      document.getElementById('hero-preview').innerHTML = `<img src="${map.hero_banner}" style="max-width:300px;border:1px solid var(--admin-border);">`;
+    }
+    if (map.logo) {
+      document.getElementById('logo-preview').innerHTML = `<img src="${map.logo}" style="max-width:200px;border:1px solid var(--admin-border);padding:16px;background:#000;">`;
+    }
+  }
+
+  // Save settings
+  document.getElementById('save-settings-btn')?.addEventListener('click', async () => {
+    const updates = fields.map(key => ({
+      key, value: document.getElementById(key)?.value || ''
+    }));
+
+    for (const update of updates) {
+      await supabase.from('website_settings').upsert(update, { onConflict: 'key' });
+    }
+
+    const msg = document.getElementById('settings-saved-msg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+  });
+
+  // Hero upload
+  document.getElementById('hero-upload-area')?.addEventListener('click', () => document.getElementById('hero-upload-input').click());
+  document.getElementById('hero-upload-input')?.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const path = `hero-${Date.now()}.jpg`;
+    const { data } = await supabase.storage.from('banners').upload(path, file);
+    if (data) {
+      const { data: urlData } = supabase.storage.from('banners').getPublicUrl(path);
+      await supabase.from('website_settings').upsert({ key: 'hero_banner', value: urlData.publicUrl }, { onConflict: 'key' });
+      document.getElementById('hero-preview').innerHTML = `<img src="${urlData.publicUrl}" style="max-width:300px;border:1px solid var(--admin-border);">`;
+    }
+  });
+
+  // Logo upload
+  document.getElementById('logo-upload-area')?.addEventListener('click', () => document.getElementById('logo-upload-input').click());
+  document.getElementById('logo-upload-input')?.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const path = `logo-${Date.now()}.${file.name.split('.').pop()}`;
+    const { data } = await supabase.storage.from('logos').upload(path, file);
+    if (data) {
+      const { data: urlData } = supabase.storage.from('logos').getPublicUrl(path);
+      await supabase.from('website_settings').upsert({ key: 'logo', value: urlData.publicUrl }, { onConflict: 'key' });
+      document.getElementById('logo-preview').innerHTML = `<img src="${urlData.publicUrl}" style="max-width:200px;border:1px solid var(--admin-border);padding:16px;background:#000;">`;
+    }
+  });
+
+  loadSettings();
+</script>
+</body>
+</html>

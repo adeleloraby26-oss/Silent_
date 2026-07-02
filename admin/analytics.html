@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics — SILENT_ Admin</title><meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Analytics</span>
+    <select class="admin-input admin-select" id="range-select" style="width:160px;">
+      <option value="7">Last 7 Days</option>
+      <option value="30" selected>Last 30 Days</option>
+      <option value="90">Last 90 Days</option>
+      <option value="365">Last Year</option>
+    </select>
+  </header>
+  <div class="admin-content">
+    <div class="admin-stats">
+      <div class="admin-stat"><span class="admin-stat__label">Revenue</span><span class="admin-stat__value" id="a-revenue">—</span></div>
+      <div class="admin-stat"><span class="admin-stat__label">Orders</span><span class="admin-stat__value" id="a-orders">—</span></div>
+      <div class="admin-stat"><span class="admin-stat__label">Avg Order Value</span><span class="admin-stat__value" id="a-aov">—</span></div>
+      <div class="admin-stat"><span class="admin-stat__label">New Customers</span><span class="admin-stat__value" id="a-customers">—</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:24px;">
+      <div class="admin-card">
+        <h2 class="admin-card__title">Revenue Over Time</h2>
+        <div id="revenue-chart" class="admin-chart-placeholder">Revenue chart visualization</div>
+      </div>
+      <div class="admin-card">
+        <h2 class="admin-card__title">Order Status Breakdown</h2>
+        <div id="status-breakdown"></div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h2 class="admin-card__title">Top Selling Products</h2>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Product</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+          <tbody id="top-products-body"><tr><td colspan="3" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('analytics');
+  const ok = await requireAdmin(); if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  async function loadAnalytics() {
+    const days = parseInt(document.getElementById('range-select').value);
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const { data: orders } = await supabase.from('orders').select('total, status, created_at, order_items(name, quantity, price)').gte('created_at', since.toISOString());
+    const { data: customers } = await supabase.from('profiles').select('id, created_at').gte('created_at', since.toISOString());
+
+    const totalRevenue = (orders || []).reduce((s, o) => s + (o.total || 0), 0);
+    const orderCount = (orders || []).length;
+    const aov = orderCount ? totalRevenue / orderCount : 0;
+
+    document.getElementById('a-revenue').textContent = '$' + totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 0 });
+    document.getElementById('a-orders').textContent = orderCount;
+    document.getElementById('a-aov').textContent = '$' + aov.toFixed(0);
+    document.getElementById('a-customers').textContent = (customers || []).length;
+
+    // Status breakdown
+    const statuses = ['pending','processing','shipped','delivered','cancelled'];
+    const counts = Object.fromEntries(statuses.map(s => [s, 0]));
+    (orders || []).forEach(o => { if (counts[o.status] !== undefined) counts[o.status]++; });
+
+    document.getElementById('status-breakdown').innerHTML = statuses.map(s => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--admin-border);">
+        <span class="admin-badge admin-badge--${s}">${s}</span>
+        <span style="font-size:13px;">${counts[s]}</span>
+      </div>
+    `).join('');
+
+    // Top products
+    const productMap = {};
+    (orders || []).forEach(o => {
+      (o.order_items || []).forEach(item => {
+        if (!productMap[item.name]) productMap[item.name] = { units: 0, revenue: 0 };
+        productMap[item.name].units += item.quantity;
+        productMap[item.name].revenue += item.quantity * item.price;
+      });
+    });
+
+    const topProducts = Object.entries(productMap).sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 10);
+    const tbody = document.getElementById('top-products-body');
+    tbody.innerHTML = topProducts.length ? topProducts.map(([name, data]) => `
+      <tr><td style="color:#fff;">${name}</td><td>${data.units}</td><td>$${data.revenue.toFixed(2)}</td></tr>
+    `).join('') : '<tr><td colspan="3" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No sales data yet</td></tr>';
+  }
+
+  document.getElementById('range-select')?.addEventListener('change', loadAnalytics);
+  loadAnalytics();
+</script>
+</body>
+</html>

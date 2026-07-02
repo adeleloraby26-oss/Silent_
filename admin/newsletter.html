@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newsletter — SILENT_ Admin</title><meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Newsletter</span>
+    <button class="admin-btn" id="export-subs-btn">Export Subscribers</button>
+  </header>
+  <div class="admin-content">
+    <div class="admin-stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:24px;">
+      <div class="admin-stat"><span class="admin-stat__label">Total Subscribers</span><span class="admin-stat__value" id="sub-count">—</span></div>
+      <div class="admin-stat"><span class="admin-stat__label">Joined This Month</span><span class="admin-stat__value" id="sub-month">—</span></div>
+    </div>
+
+    <div class="admin-card" style="margin-bottom:24px;">
+      <h2 class="admin-card__title">Compose Campaign</h2>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="admin-field"><label>Subject Line</label><input type="text" id="campaign-subject" class="admin-input" placeholder="New Drop: SILENT_ SS 2025"></div>
+        <div class="admin-field"><label>Message</label><textarea id="campaign-body" class="admin-input admin-textarea" style="min-height:160px;" placeholder="Write your newsletter content..."></textarea></div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3);">Note: Connect an email service (Resend, SendGrid, Postmark) via a Supabase Edge Function to actually send campaigns. This composer prepares the content for that integration.</p>
+        <button class="admin-btn admin-btn--primary" id="send-campaign-btn" style="align-self:flex-start;">Send to All Subscribers</button>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Email</th><th>Subscribed</th></tr></thead>
+          <tbody id="subs-table-body"><tr><td colspan="2" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('newsletter');
+  const ok = await requireAdmin(); if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  let allSubs = [];
+
+  async function loadSubs() {
+    const { data } = await supabase.from('newsletter').select('*').order('subscribed_at', { ascending: false });
+    allSubs = data || [];
+
+    document.getElementById('sub-count').textContent = allSubs.length;
+    const thisMonth = new Date(); thisMonth.setDate(1);
+    document.getElementById('sub-month').textContent = allSubs.filter(s => new Date(s.subscribed_at) >= thisMonth).length;
+
+    const tbody = document.getElementById('subs-table-body');
+    tbody.innerHTML = allSubs.length ? allSubs.map(s => `
+      <tr><td style="color:#fff;">${s.email}</td><td>${s.subscribed_at ? new Date(s.subscribed_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</td></tr>
+    `).join('') : '<tr><td colspan="2" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No subscribers yet</td></tr>';
+  }
+
+  document.getElementById('export-subs-btn')?.addEventListener('click', () => {
+    const rows = ['Email,Subscribed Date', ...allSubs.map(s => `${s.email},${s.subscribed_at}`)];
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'silent_subscribers.csv';
+    a.click();
+  });
+
+  document.getElementById('send-campaign-btn')?.addEventListener('click', () => {
+    alert('Campaign queued. Connect an email service via Supabase Edge Functions to enable actual sending.');
+  });
+
+  loadSubs();
+</script>
+</body>
+</html>

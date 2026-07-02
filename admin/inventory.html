@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory — SILENT_ Admin</title><meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="admin-main">
+  <header class="admin-topbar"><span class="admin-topbar__title">Inventory</span></header>
+  <div class="admin-content">
+    <div class="admin-filters">
+      <div class="admin-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="admin-input" id="inv-search" placeholder="Search products...">
+      </div>
+      <label class="admin-toggle" style="margin-left:auto;">
+        <input type="checkbox" id="low-stock-only">
+        <span class="admin-toggle__track"><span class="admin-toggle__thumb"></span></span>
+        Low Stock Only (&lt;5)
+      </label>
+    </div>
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Product</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th><th>Total</th></tr></thead>
+          <tbody id="inventory-table-body"><tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('inventory');
+  const ok = await requireAdmin(); if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  const SIZES = ['XS','S','M','L','XL','XXL'];
+  let allProducts = [];
+
+  async function loadInventory() {
+    const { data } = await supabase.from('products').select('id, name, slug, inventory(size, quantity)').order('name');
+    allProducts = data || [];
+    renderTable();
+  }
+
+  function renderTable() {
+    const search = document.getElementById('inv-search').value.toLowerCase();
+    const lowOnly = document.getElementById('low-stock-only').checked;
+
+    let filtered = allProducts.filter(p => p.name.toLowerCase().includes(search));
+    if (lowOnly) {
+      filtered = filtered.filter(p => (p.inventory || []).some(i => i.quantity < 5));
+    }
+
+    const tbody = document.getElementById('inventory-table-body');
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No products found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(p => {
+      const inv = Object.fromEntries((p.inventory || []).map(i => [i.size, i.quantity]));
+      const total = Object.values(inv).reduce((a,b) => a+b, 0);
+      return `
+      <tr>
+        <td style="color:#fff;">${p.name}</td>
+        ${SIZES.map(s => `<td>
+          <input type="number" class="admin-input inv-input" data-product="${p.id}" data-size="${s}" value="${inv[s] || 0}" min="0" style="width:60px;padding:6px 8px;${(inv[s]||0) < 5 ? 'color:rgba(255,200,80,0.9);' : ''}">
+        </td>`).join('')}
+        <td style="font-weight:400;">${total}</td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('.inv-input').forEach(input => {
+      input.addEventListener('change', async () => {
+        const productId = input.dataset.product;
+        const size = input.dataset.size;
+        const quantity = parseInt(input.value) || 0;
+        await supabase.from('inventory').upsert({ product_id: productId, size, quantity }, { onConflict: 'product_id,size' });
+        loadInventory();
+      });
+    });
+  }
+
+  document.getElementById('inv-search')?.addEventListener('input', renderTable);
+  document.getElementById('low-stock-only')?.addEventListener('change', renderTable);
+
+  loadInventory();
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collections — SILENT_ Admin</title><meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Collections</span>
+    <button class="admin-btn admin-btn--primary" id="new-collection-btn">+ New Collection</button>
+  </header>
+  <div class="admin-content">
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th></th><th>Name</th><th>Slug</th><th>Order</th><th>Status</th><th></th></tr></thead>
+          <tbody id="collections-table-body"><tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-modal-overlay" id="collection-modal-overlay">
+  <div class="admin-modal" style="max-width:480px;">
+    <div class="admin-modal__header">
+      <span class="admin-modal__title" id="collection-modal-title">New Collection</span>
+      <button class="admin-modal__close" id="collection-modal-close">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <form id="collection-form">
+        <input type="hidden" id="col-id">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="admin-field"><label>Name *</label><input type="text" id="col-name" class="admin-input" required></div>
+          <div class="admin-field"><label>Slug *</label><input type="text" id="col-slug" class="admin-input" required></div>
+          <div class="admin-field"><label>Description</label><textarea id="col-description" class="admin-input admin-textarea"></textarea></div>
+          <div class="admin-field"><label>Display Order</label><input type="number" id="col-order" class="admin-input" value="0"></div>
+          <div class="admin-field">
+            <label>Cover Image</label>
+            <div class="admin-upload-area" id="col-upload-area" style="padding:24px;">
+              <p style="margin-top:0;">Click to upload cover image</p>
+              <input type="file" id="col-upload-input" accept="image/*">
+            </div>
+            <div id="col-image-preview" style="margin-top:12px;"></div>
+          </div>
+          <label class="admin-toggle"><input type="checkbox" id="col-active" checked><span class="admin-toggle__track"><span class="admin-toggle__thumb"></span></span>Active</label>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;border-top:1px solid var(--admin-border);padding-top:20px;">
+          <button type="button" class="admin-btn" id="collection-cancel-btn">Cancel</button>
+          <button type="submit" class="admin-btn admin-btn--primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('collections');
+  const ok = await requireAdmin(); if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  let allCollections = [];
+  let coverImageUrl = '';
+
+  async function loadCollections() {
+    const { data } = await supabase.from('collections').select('*').order('display_order');
+    allCollections = data || [];
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('collections-table-body');
+    if (!allCollections.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No collections yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allCollections.map(c => `
+      <tr>
+        <td><div style="width:40px;height:50px;background:#111;border:1px solid var(--admin-border);overflow:hidden;">${c.cover_image ? `<img src="${c.cover_image}" style="width:100%;height:100%;object-fit:cover;">` : ''}</div></td>
+        <td style="color:#fff;">${c.name}</td>
+        <td style="font-family:monospace;">${c.slug}</td>
+        <td>${c.display_order}</td>
+        <td><span class="admin-badge admin-badge--${c.is_active ? 'active' : 'inactive'}">${c.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <button class="admin-btn admin-btn--sm" data-edit="${c.id}">Edit</button>
+          <button class="admin-btn admin-btn--sm admin-btn--danger" data-delete="${c.id}">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.edit)));
+    tbody.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('Delete this collection?')) return;
+      await supabase.from('collections').delete().eq('id', btn.dataset.delete);
+      loadCollections();
+    }));
+  }
+
+  const overlay = document.getElementById('collection-modal-overlay');
+  function openModal(id = null) {
+    document.getElementById('collection-form').reset();
+    document.getElementById('col-id').value = id || '';
+    document.getElementById('collection-modal-title').textContent = id ? 'Edit Collection' : 'New Collection';
+    coverImageUrl = '';
+    document.getElementById('col-image-preview').innerHTML = '';
+    if (id) {
+      const c = allCollections.find(x => x.id === id);
+      if (c) {
+        document.getElementById('col-name').value = c.name;
+        document.getElementById('col-slug').value = c.slug;
+        document.getElementById('col-description').value = c.description || '';
+        document.getElementById('col-order').value = c.display_order || 0;
+        document.getElementById('col-active').checked = c.is_active;
+        coverImageUrl = c.cover_image || '';
+        if (coverImageUrl) document.getElementById('col-image-preview').innerHTML = `<img src="${coverImageUrl}" style="max-width:200px;">`;
+      }
+    }
+    overlay.classList.add('active');
+  }
+
+  document.getElementById('new-collection-btn')?.addEventListener('click', () => openModal());
+  document.getElementById('collection-modal-close')?.addEventListener('click', () => overlay.classList.remove('active'));
+  document.getElementById('collection-cancel-btn')?.addEventListener('click', () => overlay.classList.remove('active'));
+
+  document.getElementById('col-name')?.addEventListener('input', e => {
+    const slugField = document.getElementById('col-slug');
+    if (!slugField.dataset.touched) slugField.value = e.target.value.toLowerCase().replace(/\s+/g,'-').replace(/[^\w-]/g,'');
+  });
+  document.getElementById('col-slug')?.addEventListener('input', e => e.target.dataset.touched = '1');
+
+  document.getElementById('col-upload-area')?.addEventListener('click', () => document.getElementById('col-upload-input').click());
+  document.getElementById('col-upload-input')?.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const path = `${Date.now()}-${file.name}`;
+    const { data } = await supabase.storage.from('banners').upload(path, file);
+    if (data) {
+      const { data: urlData } = supabase.storage.from('banners').getPublicUrl(path);
+      coverImageUrl = urlData.publicUrl;
+      document.getElementById('col-image-preview').innerHTML = `<img src="${coverImageUrl}" style="max-width:200px;">`;
+    }
+  });
+
+  document.getElementById('collection-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('col-id').value;
+    const data = {
+      name: document.getElementById('col-name').value.trim(),
+      slug: document.getElementById('col-slug').value.trim(),
+      description: document.getElementById('col-description').value.trim(),
+      display_order: parseInt(document.getElementById('col-order').value) || 0,
+      is_active: document.getElementById('col-active').checked,
+      cover_image: coverImageUrl || null
+    };
+    if (id) await supabase.from('collections').update(data).eq('id', id);
+    else await supabase.from('collections').insert(data);
+    overlay.classList.remove('active');
+    loadCollections();
+  });
+
+  loadCollections();
+</script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — SILENT_ Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin navigation">
+  <div class="admin-sidebar__logo">
+    <span class="admin-sidebar__logo-text">SILENT<span style="opacity:0.3">_</span></span>
+    <span class="admin-sidebar__badge">Admin</span>
+  </div>
+
+  <nav class="admin-nav" aria-label="Admin sections">
+    <div class="admin-nav__section">
+      <span class="admin-nav__section-label">Overview</span>
+      <a href="/admin/index.html" class="admin-nav__link active">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/admin/analytics.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="admin-nav__section">
+      <span class="admin-nav__section-label">Catalog</span>
+      <a href="/admin/products.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Products
+      </a>
+      <a href="/admin/collections.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Collections
+      </a>
+      <a href="/admin/inventory.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Inventory
+      </a>
+    </div>
+
+    <div class="admin-nav__section">
+      <span class="admin-nav__section-label">Commerce</span>
+      <a href="/admin/orders.html" class="admin-nav__link admin-notif">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Orders
+      </a>
+      <a href="/admin/customers.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a>
+      <a href="/admin/coupons.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Coupons
+      </a>
+    </div>
+
+    <div class="admin-nav__section">
+      <span class="admin-nav__section-label">Content</span>
+      <a href="/admin/newsletter.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Newsletter
+      </a>
+      <a href="/admin/settings.html" class="admin-nav__link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </div>
+  </nav>
+
+  <div class="admin-sidebar__bottom">
+    <div class="admin-sidebar__user">
+      <div class="admin-sidebar__user-avatar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <div id="admin-user-name" style="font-size:11px;color:rgba(255,255,255,0.6);">Admin</div>
+        <button id="admin-signout" style="font-size:10px;color:rgba(255,255,255,0.25);background:none;border:none;letter-spacing:0.1em;cursor:pointer;padding:0;font-family:inherit;">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Dashboard</span>
+    <div class="admin-topbar__actions">
+      <span id="admin-date" style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.08em;"></span>
+      <a href="/index.html" target="_blank" class="admin-btn admin-btn--sm">View Store ↗</a>
+    </div>
+  </header>
+
+  <div class="admin-content">
+
+    <!-- Stats -->
+    <div class="admin-stats" id="admin-stats">
+      <div class="admin-stat">
+        <span class="admin-stat__label">Total Revenue</span>
+        <span class="admin-stat__value" id="stat-revenue">—</span>
+        <span class="admin-stat__change up" id="stat-revenue-change"></span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__label">Orders</span>
+        <span class="admin-stat__value" id="stat-orders">—</span>
+        <span class="admin-stat__change up" id="stat-orders-change"></span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__label">Customers</span>
+        <span class="admin-stat__value" id="stat-customers">—</span>
+        <span class="admin-stat__change" id="stat-customers-change"></span>
+      </div>
+      <div class="admin-stat">
+        <span class="admin-stat__label">Products</span>
+        <span class="admin-stat__value" id="stat-products">—</span>
+        <span class="admin-stat__change" id="stat-products-change"></span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;">
+
+      <!-- Recent Orders -->
+      <div class="admin-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2 class="admin-card__title" style="margin:0;">Recent Orders</h2>
+          <a href="/admin/orders.html" class="admin-btn admin-btn--sm">View All</a>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table" id="recent-orders-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="recent-orders-body">
+              <tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.2);">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div style="display:flex;flex-direction:column;gap:24px;">
+
+        <!-- Low Stock Alerts -->
+        <div class="admin-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h2 class="admin-card__title" style="margin:0;">Low Stock</h2>
+            <a href="/admin/inventory.html" class="admin-btn admin-btn--sm">Manage</a>
+          </div>
+          <div id="low-stock-list">
+            <div style="font-size:11px;color:rgba(255,255,255,0.2);text-align:center;padding:20px 0;">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="admin-card">
+          <h2 class="admin-card__title">Quick Actions</h2>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="/admin/products.html?action=new" class="admin-btn" style="justify-content:flex-start;gap:10px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add New Product
+            </a>
+            <a href="/admin/orders.html?filter=pending" class="admin-btn" style="justify-content:flex-start;gap:10px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/></svg>
+              Pending Orders
+            </a>
+            <a href="/admin/newsletter.html" class="admin-btn" style="justify-content:flex-start;gap:10px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg>
+              Send Newsletter
+            </a>
+            <a href="/admin/settings.html" class="admin-btn" style="justify-content:flex-start;gap:10px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/></svg>
+              Site Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  const ok = await requireAdmin();
+  if (!ok) throw new Error('Access denied');
+
+  // Set date
+  document.getElementById('admin-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  // Get admin user
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+    document.getElementById('admin-user-name').textContent = profile?.full_name || user.email;
+  }
+
+  // Sign out
+  document.getElementById('admin-signout')?.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/auth/login.html';
+  });
+
+  // Load stats
+  const [ordersRes, customersRes, productsRes] = await Promise.all([
+    supabase.from('orders').select('total, created_at'),
+    supabase.from('profiles').select('id', { count: 'exact' }),
+    supabase.from('products').select('id', { count: 'exact' }).eq('is_active', true)
+  ]);
+
+  const orders = ordersRes.data || [];
+  const totalRevenue = orders.reduce((s, o) => s + (o.total || 0), 0);
+
+  document.getElementById('stat-revenue').textContent = '$' + totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 0 });
+  document.getElementById('stat-orders').textContent = orders.length;
+  document.getElementById('stat-customers').textContent = customersRes.count || 0;
+  document.getElementById('stat-products').textContent = productsRes.count || 0;
+
+  // Recent orders
+  const { data: recentOrders } = await supabase
+    .from('orders')
+    .select('id, email, status, total, created_at')
+    .order('created_at', { ascending: false })
+    .limit(8);
+
+  const tbody = document.getElementById('recent-orders-body');
+  if (recentOrders?.length) {
+    tbody.innerHTML = recentOrders.map(o => `
+      <tr>
+        <td><a href="/admin/orders.html?id=${o.id}" style="color:rgba(255,255,255,0.7);font-family:monospace;">#${o.id.slice(0,8).toUpperCase()}</a></td>
+        <td>${o.email}</td>
+        <td>${new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+        <td><span class="admin-badge admin-badge--${o.status}">${o.status}</span></td>
+        <td>$${(o.total || 0).toFixed(2)}</td>
+      </tr>
+    `).join('');
+  } else {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.2);">No orders yet</td></tr>';
+  }
+
+  // Low stock
+  const { data: lowStock } = await supabase
+    .from('inventory')
+    .select('size, quantity, products(name, slug)')
+    .lt('quantity', 5)
+    .gt('quantity', 0)
+    .order('quantity')
+    .limit(6);
+
+  const lowStockEl = document.getElementById('low-stock-list');
+  if (lowStock?.length) {
+    lowStockEl.innerHTML = lowStock.map(inv => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--admin-border);">
+        <div>
+          <div style="font-size:12px;letter-spacing:0.06em;">${inv.products?.name || 'Unknown'}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;letter-spacing:0.1em;">Size ${inv.size}</div>
+        </div>
+        <span style="font-size:11px;color:rgba(255,200,80,0.8);letter-spacing:0.1em;">${inv.quantity} left</span>
+      </div>
+    `).join('');
+  } else {
+    lowStockEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);text-align:center;padding:20px 0;">All items adequately stocked</div>';
+  }
+</script>
+
+</body>
+</html>

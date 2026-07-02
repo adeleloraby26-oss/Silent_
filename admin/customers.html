@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customers — SILENT_ Admin</title><meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="admin-main">
+  <header class="admin-topbar"><span class="admin-topbar__title">Customers</span></header>
+  <div class="admin-content">
+    <div class="admin-filters">
+      <div class="admin-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="admin-input" id="customer-search" placeholder="Search customers...">
+      </div>
+    </div>
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Joined</th><th>Role</th></tr></thead>
+          <tbody id="customers-table-body"><tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('customers');
+  const ok = await requireAdmin(); if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  let allCustomers = [];
+
+  async function loadCustomers() {
+    const { data: profiles } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    const { data: orders } = await supabase.from('orders').select('user_id, total');
+
+    allCustomers = (profiles || []).map(p => {
+      const userOrders = (orders || []).filter(o => o.user_id === p.id);
+      return {
+        ...p,
+        orderCount: userOrders.length,
+        totalSpent: userOrders.reduce((s, o) => s + (o.total || 0), 0)
+      };
+    });
+    renderTable(allCustomers);
+  }
+
+  function renderTable(customers) {
+    const tbody = document.getElementById('customers-table-body');
+    if (!customers.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No customers found</td></tr>';
+      return;
+    }
+    tbody.innerHTML = customers.map(c => `
+      <tr>
+        <td style="color:#fff;">${c.full_name || '—'}</td>
+        <td>${c.email || '—'}</td>
+        <td>${c.orderCount}</td>
+        <td>$${c.totalSpent.toFixed(2)}</td>
+        <td>${new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
+        <td><span class="admin-badge admin-badge--${c.role === 'admin' ? 'active' : 'inactive'}">${c.role || 'customer'}</span></td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('customer-search')?.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    renderTable(allCustomers.filter(c => (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q)));
+  });
+
+  loadCustomers();
+</script>
+</body>
+</html>

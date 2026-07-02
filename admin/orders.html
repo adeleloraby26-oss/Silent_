@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders — SILENT_ Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div id="sidebar-root"></div>
+
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Orders</span>
+    <div class="admin-topbar__actions">
+      <button class="admin-btn" id="export-orders-btn">Export CSV</button>
+    </div>
+  </header>
+
+  <div class="admin-content">
+    <div class="admin-filters">
+      <div class="admin-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="admin-input" id="order-search" placeholder="Search by email or order ID...">
+      </div>
+      <select class="admin-input admin-select" id="status-filter" style="width:160px;">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="processing">Processing</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Order</th><th>Customer</th><th>Items</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr>
+          </thead>
+          <tbody id="orders-table-body">
+            <tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="admin-pagination" id="pagination"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div class="admin-modal-overlay" id="order-modal-overlay">
+  <div class="admin-modal">
+    <div class="admin-modal__header">
+      <span class="admin-modal__title" id="order-modal-title">Order Details</span>
+      <button class="admin-modal__close" id="order-modal-close">✕</button>
+    </div>
+    <div class="admin-modal__body" id="order-modal-body"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('orders');
+  const ok = await requireAdmin();
+  if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  let page = 0;
+  const PAGE_SIZE = 15;
+  let allOrders = [];
+
+  // URL filter
+  const urlFilter = new URLSearchParams(window.location.search).get('filter');
+  if (urlFilter) document.getElementById('status-filter').value = urlFilter;
+
+  async function loadOrders() {
+    const search = document.getElementById('order-search').value;
+    const status = document.getElementById('status-filter').value;
+
+    let q = supabase.from('orders').select('*, order_items(*)', { count: 'exact' });
+    if (search) q = q.ilike('email', `%${search}%`);
+    if (status) q = q.eq('status', status);
+
+    const { data, count } = await q.order('created_at', { ascending: false }).range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    allOrders = data || [];
+    renderTable(allOrders);
+    renderPagination(count || 0);
+  }
+
+  function renderTable(orders) {
+    const tbody = document.getElementById('orders-table-body');
+    if (!orders.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No orders found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td style="font-family:monospace;color:#fff;">#${o.id.slice(0,8).toUpperCase()}</td>
+        <td>${o.email}</td>
+        <td>${o.order_items?.length || 0} item${(o.order_items?.length || 0) !== 1 ? 's' : ''}</td>
+        <td>${new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+        <td><span class="admin-badge admin-badge--${o.status}">${o.status}</span></td>
+        <td>$${(o.total || 0).toFixed(2)}</td>
+        <td><button class="admin-btn admin-btn--sm" data-view="${o.id}">View</button></td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('[data-view]').forEach(btn => {
+      btn.addEventListener('click', () => openOrderModal(btn.dataset.view));
+    });
+  }
+
+  function renderPagination(total) {
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    const el = document.getElementById('pagination');
+    el.innerHTML = `
+      <span>${total} order${total !== 1 ? 's' : ''} total</span>
+      <div class="admin-pagination__pages">
+        ${Array.from({length: Math.max(totalPages,1)}, (_, i) => `<button class="admin-pagination__page ${i === page ? 'active' : ''}" data-page="${i}">${i+1}</button>`).join('')}
+      </div>
+    `;
+    el.querySelectorAll('[data-page]').forEach(btn => {
+      btn.addEventListener('click', () => { page = parseInt(btn.dataset.page); loadOrders(); });
+    });
+  }
+
+  function openOrderModal(id) {
+    const order = allOrders.find(o => o.id === id);
+    if (!order) return;
+
+    document.getElementById('order-modal-title').textContent = `Order #${order.id.slice(0,8).toUpperCase()}`;
+    document.getElementById('order-modal-body').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+        <div>
+          <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Customer</div>
+          <div style="font-size:13px;">${order.email}</div>
+        </div>
+        <div>
+          <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Date</div>
+          <div style="font-size:13px;">${new Date(order.created_at).toLocaleString()}</div>
+        </div>
+      </div>
+
+      ${order.shipping_address ? `
+      <div style="margin-bottom:24px;">
+        <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:8px;">Shipping Address</div>
+        <div style="font-size:13px;line-height:1.6;color:rgba(255,255,255,0.7);">
+          ${order.shipping_address.first_name} ${order.shipping_address.last_name}<br>
+          ${order.shipping_address.address} ${order.shipping_address.address2 || ''}<br>
+          ${order.shipping_address.city}, ${order.shipping_address.state} ${order.shipping_address.zip}<br>
+          ${order.shipping_address.country}
+          ${order.shipping_address.phone ? `<br>${order.shipping_address.phone}` : ''}
+        </div>
+      </div>` : ''}
+
+      <div style="margin-bottom:24px;">
+        <div style="font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;">Items</div>
+        ${(order.order_items || []).map(item => `
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--admin-border);font-size:12px;">
+            <span>${item.name} (${item.size}) × ${item.quantity}</span>
+            <span>$${(item.price * item.quantity).toFixed(2)}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;color:rgba(255,255,255,0.6);"><span>Subtotal</span><span>$${(order.subtotal || 0).toFixed(2)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;color:rgba(255,255,255,0.6);"><span>Shipping</span><span>$${(order.shipping_cost || 0).toFixed(2)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;color:rgba(255,255,255,0.6);"><span>Tax</span><span>$${(order.tax || 0).toFixed(2)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:15px;border-top:1px solid var(--admin-border);padding-top:8px;margin-top:8px;"><span>Total</span><span>$${(order.total || 0).toFixed(2)}</span></div>
+      </div>
+
+      <div class="admin-field">
+        <label>Update Status</label>
+        <select id="update-status" class="admin-input admin-select">
+          <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+          <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+          <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+          <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+      </div>
+      <button class="admin-btn admin-btn--primary" id="save-status-btn" style="margin-top:16px;width:100%;justify-content:center;">Update Order</button>
+    `;
+
+    document.getElementById('save-status-btn')?.addEventListener('click', async () => {
+      const newStatus = document.getElementById('update-status').value;
+      await supabase.from('orders').update({ status: newStatus }).eq('id', order.id);
+      document.getElementById('order-modal-overlay').classList.remove('active');
+      loadOrders();
+    });
+
+    document.getElementById('order-modal-overlay').classList.add('active');
+  }
+
+  document.getElementById('order-modal-close')?.addEventListener('click', () => {
+    document.getElementById('order-modal-overlay').classList.remove('active');
+  });
+  document.getElementById('order-modal-overlay')?.addEventListener('click', e => {
+    if (e.target.id === 'order-modal-overlay') e.target.classList.remove('active');
+  });
+
+  document.getElementById('order-search')?.addEventListener('input', () => { page = 0; loadOrders(); });
+  document.getElementById('status-filter')?.addEventListener('change', () => { page = 0; loadOrders(); });
+
+  document.getElementById('export-orders-btn')?.addEventListener('click', () => {
+    const rows = [['Order ID','Email','Status','Subtotal','Shipping','Tax','Total','Date'].join(',')];
+    allOrders.forEach(o => {
+      rows.push([o.id, o.email, o.status, o.subtotal, o.shipping_cost, o.tax, o.total, o.created_at].join(','));
+    });
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'silent_orders.csv';
+    a.click();
+  });
+
+  // Check for ?id= to open directly
+  const orderId = new URLSearchParams(window.location.search).get('id');
+
+  await loadOrders();
+  if (orderId) openOrderModal(orderId);
+</script>
+</body>
+</html>

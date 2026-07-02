@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coupons — SILENT_ Admin</title><meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Coupons & Discounts</span>
+    <button class="admin-btn admin-btn--primary" id="new-coupon-btn">+ New Coupon</button>
+  </header>
+  <div class="admin-content">
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Uses</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+          <tbody id="coupons-table-body"><tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-modal-overlay" id="coupon-modal-overlay">
+  <div class="admin-modal" style="max-width:480px;">
+    <div class="admin-modal__header">
+      <span class="admin-modal__title" id="coupon-modal-title">New Coupon</span>
+      <button class="admin-modal__close" id="coupon-modal-close">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <form id="coupon-form">
+        <input type="hidden" id="coupon-id">
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="admin-field"><label>Coupon Code *</label><input type="text" id="c-code" class="admin-input" style="text-transform:uppercase;" required></div>
+          <div class="admin-field">
+            <label>Discount Type</label>
+            <select id="c-type" class="admin-input admin-select">
+              <option value="percentage">Percentage (%)</option>
+              <option value="fixed">Fixed Amount ($)</option>
+            </select>
+          </div>
+          <div class="admin-field"><label>Discount Value *</label><input type="number" id="c-value" class="admin-input" required></div>
+          <div class="admin-field"><label>Minimum Order Amount</label><input type="number" id="c-minimum" class="admin-input" placeholder="0"></div>
+          <div class="admin-field"><label>Expiry Date</label><input type="date" id="c-expires" class="admin-input"></div>
+          <label class="admin-toggle"><input type="checkbox" id="c-active" checked><span class="admin-toggle__track"><span class="admin-toggle__thumb"></span></span>Active</label>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;border-top:1px solid var(--admin-border);padding-top:20px;">
+          <button type="button" class="admin-btn" id="coupon-cancel-btn">Cancel</button>
+          <button type="submit" class="admin-btn admin-btn--primary">Save Coupon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('coupons');
+  const ok = await requireAdmin(); if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  let allCoupons = [];
+
+  async function loadCoupons() {
+    const { data } = await supabase.from('coupons').select('*').order('created_at', { ascending: false });
+    allCoupons = data || [];
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('coupons-table-body');
+    if (!allCoupons.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No coupons yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = allCoupons.map(c => `
+      <tr>
+        <td style="color:#fff;font-family:monospace;">${c.code}</td>
+        <td>${c.type === 'percentage' ? 'Percentage' : 'Fixed'}</td>
+        <td>${c.type === 'percentage' ? c.value + '%' : '$' + c.value}</td>
+        <td>${c.minimum_amount ? '$' + c.minimum_amount : '—'}</td>
+        <td>${c.uses_count || 0}</td>
+        <td>${c.expires_at ? new Date(c.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Never'}</td>
+        <td><span class="admin-badge admin-badge--${c.is_active ? 'active' : 'inactive'}">${c.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td>
+          <button class="admin-btn admin-btn--sm" data-edit="${c.id}">Edit</button>
+          <button class="admin-btn admin-btn--sm admin-btn--danger" data-delete="${c.id}">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.edit)));
+    tbody.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {
+      if (!confirm('Delete this coupon?')) return;
+      await supabase.from('coupons').delete().eq('id', btn.dataset.delete);
+      loadCoupons();
+    }));
+  }
+
+  const overlay = document.getElementById('coupon-modal-overlay');
+  function openModal(id = null) {
+    document.getElementById('coupon-form').reset();
+    document.getElementById('coupon-id').value = id || '';
+    document.getElementById('coupon-modal-title').textContent = id ? 'Edit Coupon' : 'New Coupon';
+    if (id) {
+      const c = allCoupons.find(x => x.id === id);
+      if (c) {
+        document.getElementById('c-code').value = c.code;
+        document.getElementById('c-type').value = c.type;
+        document.getElementById('c-value').value = c.value;
+        document.getElementById('c-minimum').value = c.minimum_amount || '';
+        document.getElementById('c-expires').value = c.expires_at ? c.expires_at.split('T')[0] : '';
+        document.getElementById('c-active').checked = c.is_active;
+      }
+    }
+    overlay.classList.add('active');
+  }
+
+  document.getElementById('new-coupon-btn')?.addEventListener('click', () => openModal());
+  document.getElementById('coupon-modal-close')?.addEventListener('click', () => overlay.classList.remove('active'));
+  document.getElementById('coupon-cancel-btn')?.addEventListener('click', () => overlay.classList.remove('active'));
+
+  document.getElementById('coupon-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('coupon-id').value;
+    const data = {
+      code: document.getElementById('c-code').value.trim().toUpperCase(),
+      type: document.getElementById('c-type').value,
+      value: parseFloat(document.getElementById('c-value').value),
+      minimum_amount: document.getElementById('c-minimum').value ? parseFloat(document.getElementById('c-minimum').value) : null,
+      expires_at: document.getElementById('c-expires').value || null,
+      is_active: document.getElementById('c-active').checked
+    };
+    if (id) await supabase.from('coupons').update(data).eq('id', id);
+    else await supabase.from('coupons').insert(data);
+    overlay.classList.remove('active');
+    loadCoupons();
+  });
+
+  loadCoupons();
+</script>
+</body>
+</html>

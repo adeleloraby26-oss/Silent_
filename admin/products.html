@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products — SILENT_ Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div id="sidebar-root"></div>
+
+<div class="admin-main">
+  <header class="admin-topbar">
+    <span class="admin-topbar__title">Products</span>
+    <div class="admin-topbar__actions">
+      <button class="admin-btn admin-btn--primary" id="new-product-btn">+ Add Product</button>
+    </div>
+  </header>
+
+  <div class="admin-content">
+    <div class="admin-filters">
+      <div class="admin-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="admin-input" id="product-search" placeholder="Search products...">
+      </div>
+      <select class="admin-input admin-select" id="category-filter" style="width:160px;">
+        <option value="">All Categories</option>
+      </select>
+      <select class="admin-input admin-select" id="status-filter" style="width:140px;">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+      <button class="admin-btn" id="export-csv-btn" style="margin-left:auto;">Export CSV</button>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body">
+            <tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="admin-pagination" id="pagination"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="admin-modal-overlay" id="product-modal-overlay">
+  <div class="admin-modal">
+    <div class="admin-modal__header">
+      <span class="admin-modal__title" id="modal-title">Add Product</span>
+      <button class="admin-modal__close" id="modal-close">✕</button>
+    </div>
+    <div class="admin-modal__body">
+      <form id="product-form">
+        <input type="hidden" id="product-id">
+
+        <div class="admin-form-grid">
+          <div class="admin-field" style="grid-column:1/-1;">
+            <label for="p-name">Product Name *</label>
+            <input type="text" id="p-name" class="admin-input" required>
+          </div>
+          <div class="admin-field">
+            <label for="p-slug">Slug *</label>
+            <input type="text" id="p-slug" class="admin-input" required>
+          </div>
+          <div class="admin-field">
+            <label for="p-category">Category</label>
+            <select id="p-category" class="admin-input admin-select"></select>
+          </div>
+          <div class="admin-field">
+            <label for="p-collection">Collection</label>
+            <select id="p-collection" class="admin-input admin-select"></select>
+          </div>
+          <div class="admin-field">
+            <label for="p-price">Price ($) *</label>
+            <input type="number" id="p-price" class="admin-input" step="0.01" required>
+          </div>
+          <div class="admin-field">
+            <label for="p-sale-price">Sale Price ($)</label>
+            <input type="number" id="p-sale-price" class="admin-input" step="0.01">
+          </div>
+          <div class="admin-field" style="grid-column:1/-1;">
+            <label for="p-description">Description</label>
+            <textarea id="p-description" class="admin-input admin-textarea"></textarea>
+          </div>
+          <div class="admin-field" style="grid-column:1/-1;">
+            <label for="p-materials">Materials</label>
+            <textarea id="p-materials" class="admin-input admin-textarea" style="min-height:60px;"></textarea>
+          </div>
+          <div class="admin-field" style="grid-column:1/-1;">
+            <label for="p-care">Care Instructions</label>
+            <textarea id="p-care" class="admin-input admin-textarea" style="min-height:60px;"></textarea>
+          </div>
+
+          <!-- Inventory by size -->
+          <div class="admin-field" style="grid-column:1/-1;">
+            <label>Stock by Size</label>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;">
+              ${['XS','S','M','L','XL','XXL'].map(s => `
+                <div>
+                  <label style="font-size:9px;color:rgba(255,255,255,.3);">${s}</label>
+                  <input type="number" class="admin-input size-stock" data-size="${s}" min="0" value="0" style="padding:8px;">
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="admin-field" style="grid-column:1/-1;">
+            <label>Product Images</label>
+            <div class="admin-upload-area" id="upload-area">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" style="margin:0 auto;display:block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p>Click or drag images here to upload</p>
+              <input type="file" id="image-upload-input" accept="image/*" multiple>
+            </div>
+            <div class="admin-image-preview-grid" id="image-preview-grid"></div>
+          </div>
+
+          <div class="admin-field">
+            <label class="admin-toggle">
+              <input type="checkbox" id="p-active" checked>
+              <span class="admin-toggle__track"><span class="admin-toggle__thumb"></span></span>
+              Active
+            </label>
+          </div>
+          <div class="admin-field">
+            <label class="admin-toggle">
+              <input type="checkbox" id="p-bestseller">
+              <span class="admin-toggle__track"><span class="admin-toggle__thumb"></span></span>
+              Best Seller
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;border-top:1px solid var(--admin-border);padding-top:20px;">
+          <button type="button" class="admin-btn" id="cancel-btn">Cancel</button>
+          <button type="submit" class="admin-btn admin-btn--primary" id="save-product-btn">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { renderAdminSidebar, initAdminCommon } from '/admin/js/admin-shared.js';
+  import { supabase, requireAdmin } from '/assets/js/supabase.js';
+
+  document.getElementById('sidebar-root').innerHTML = renderAdminSidebar('products');
+  const ok = await requireAdmin();
+  if (!ok) throw new Error('Access denied');
+  await initAdminCommon();
+
+  let uploadedImages = [];
+  let allProducts = [];
+  let page = 0;
+  const PAGE_SIZE = 15;
+
+  // Load categories/collections for dropdowns
+  async function loadDropdowns() {
+    const [cats, cols] = await Promise.all([
+      supabase.from('categories').select('id, name, slug').order('name'),
+      supabase.from('collections').select('id, name, slug').order('name')
+    ]);
+
+    const catFilter = document.getElementById('category-filter');
+    const catSelect = document.getElementById('p-category');
+    cats.data?.forEach(c => {
+      catFilter.innerHTML += `<option value="${c.slug}">${c.name}</option>`;
+      catSelect.innerHTML += `<option value="${c.slug}">${c.name}</option>`;
+    });
+
+    const colSelect = document.getElementById('p-collection');
+    colSelect.innerHTML = '<option value="">None</option>';
+    cols.data?.forEach(c => {
+      colSelect.innerHTML += `<option value="${c.slug}">${c.name}</option>`;
+    });
+  }
+
+  // Load products
+  async function loadProducts() {
+    const search = document.getElementById('product-search').value;
+    const category = document.getElementById('category-filter').value;
+    const status = document.getElementById('status-filter').value;
+
+    let q = supabase.from('products').select('*, inventory(quantity)', { count: 'exact' });
+    if (search) q = q.ilike('name', `%${search}%`);
+    if (category) q = q.eq('category_slug', category);
+    if (status === 'active') q = q.eq('is_active', true);
+    if (status === 'inactive') q = q.eq('is_active', false);
+
+    const { data, count } = await q.order('created_at', { ascending: false }).range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+    allProducts = data || [];
+    renderTable(allProducts);
+    renderPagination(count || 0);
+  }
+
+  function renderTable(products) {
+    const tbody = document.getElementById('products-table-body');
+    if (!products.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:rgba(255,255,255,0.2);padding:40px;">No products found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = products.map(p => {
+      const totalStock = (p.inventory || []).reduce((s, i) => s + i.quantity, 0);
+      return `
+      <tr>
+        <td><div style="width:40px;height:50px;background:#111;border:1px solid var(--admin-border);"></div></td>
+        <td style="color:#fff;">${p.name}</td>
+        <td>${p.category_name || '—'}</td>
+        <td>${p.sale_price ? `<s style="opacity:.4">$${p.price}</s> $${p.sale_price}` : `$${p.price}`}</td>
+        <td>${totalStock}</td>
+        <td><span class="admin-badge admin-badge--${p.is_active ? 'active' : 'inactive'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+        <td>${new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+        <td>
+          <button class="admin-btn admin-btn--sm" data-edit="${p.id}">Edit</button>
+          <button class="admin-btn admin-btn--sm admin-btn--danger" data-delete="${p.id}">Delete</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    tbody.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => openModal(btn.dataset.edit));
+    });
+    tbody.querySelectorAll('[data-delete]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this product permanently?')) return;
+        await supabase.from('products').delete().eq('id', btn.dataset.delete);
+        loadProducts();
+      });
+    });
+  }
+
+  function renderPagination(total) {
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    const el = document.getElementById('pagination');
+    el.innerHTML = `
+      <span>${total} product${total !== 1 ? 's' : ''} total</span>
+      <div class="admin-pagination__pages">
+        ${Array.from({length: Math.max(totalPages,1)}, (_, i) => `<button class="admin-pagination__page ${i === page ? 'active' : ''}" data-page="${i}">${i+1}</button>`).join('')}
+      </div>
+    `;
+    el.querySelectorAll('[data-page]').forEach(btn => {
+      btn.addEventListener('click', () => { page = parseInt(btn.dataset.page); loadProducts(); });
+    });
+  }
+
+  // Modal
+  const overlay = document.getElementById('product-modal-overlay');
+  function openModal(id = null) {
+    document.getElementById('product-form').reset();
+    uploadedImages = [];
+    document.getElementById('image-preview-grid').innerHTML = '';
+    document.getElementById('modal-title').textContent = id ? 'Edit Product' : 'Add Product';
+    document.getElementById('product-id').value = id || '';
+
+    if (id) {
+      const product = allProducts.find(p => p.id === id);
+      if (product) {
+        document.getElementById('p-name').value = product.name || '';
+        document.getElementById('p-slug').value = product.slug || '';
+        document.getElementById('p-category').value = product.category_slug || '';
+        document.getElementById('p-collection').value = product.collection_slug || '';
+        document.getElementById('p-price').value = product.price || '';
+        document.getElementById('p-sale-price').value = product.sale_price || '';
+        document.getElementById('p-description').value = product.description || '';
+        document.getElementById('p-materials').value = product.materials || '';
+        document.getElementById('p-care').value = product.care_instructions || '';
+        document.getElementById('p-active').checked = product.is_active;
+        document.getElementById('p-bestseller').checked = product.is_bestseller;
+
+        supabase.from('inventory').select('size, quantity').eq('product_id', id).then(({ data }) => {
+          data?.forEach(inv => {
+            const input = document.querySelector(`.size-stock[data-size="${inv.size}"]`);
+            if (input) input.value = inv.quantity;
+          });
+        });
+      }
+    }
+    overlay.classList.add('active');
+  }
+
+  function closeModal() { overlay.classList.remove('active'); }
+
+  document.getElementById('new-product-btn')?.addEventListener('click', () => openModal());
+  document.getElementById('modal-close')?.addEventListener('click', closeModal);
+  document.getElementById('cancel-btn')?.addEventListener('click', closeModal);
+  overlay?.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  // Auto slug
+  document.getElementById('p-name')?.addEventListener('input', e => {
+    const slugField = document.getElementById('p-slug');
+    if (!slugField.dataset.touched) {
+      slugField.value = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    }
+  });
+  document.getElementById('p-slug')?.addEventListener('input', e => { e.target.dataset.touched = '1'; });
+
+  // Image upload
+  const uploadArea = document.getElementById('upload-area');
+  const fileInput = document.getElementById('image-upload-input');
+  uploadArea?.addEventListener('click', () => fileInput.click());
+  uploadArea?.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  uploadArea?.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+  uploadArea?.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+  fileInput?.addEventListener('change', () => handleFiles(fileInput.files));
+
+  function handleFiles(files) {
+    [...files].forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        uploadedImages.push({ file, dataUrl: e.target.result });
+        renderImagePreviews();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderImagePreviews() {
+    const grid = document.getElementById('image-preview-grid');
+    grid.innerHTML = uploadedImages.map((img, i) => `
+      <div class="admin-image-thumb">
+        <img src="${img.dataUrl}" alt="Preview ${i+1}">
+        <button type="button" class="admin-image-thumb__remove" data-remove="${i}">✕</button>
+      </div>
+    `).join('');
+    grid.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        uploadedImages.splice(parseInt(btn.dataset.remove), 1);
+        renderImagePreviews();
+      });
+    });
+  }
+
+  // Save product
+  document.getElementById('product-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('product-id').value;
+    const categorySlug = document.getElementById('p-category').value;
+    const collectionSlug = document.getElementById('p-collection').value;
+
+    const productData = {
+      name: document.getElementById('p-name').value.trim(),
+      slug: document.getElementById('p-slug').value.trim(),
+      category_slug: categorySlug || null,
+      collection_slug: collectionSlug || null,
+      price: parseFloat(document.getElementById('p-price').value),
+      sale_price: document.getElementById('p-sale-price').value ? parseFloat(document.getElementById('p-sale-price').value) : null,
+      description: document.getElementById('p-description').value.trim(),
+      materials: document.getElementById('p-materials').value.trim(),
+      care_instructions: document.getElementById('p-care').value.trim(),
+      is_active: document.getElementById('p-active').checked,
+      is_bestseller: document.getElementById('p-bestseller').checked
+    };
+
+    let productId = id;
+
+    if (id) {
+      await supabase.from('products').update(productData).eq('id', id);
+    } else {
+      const { data, error } = await supabase.from('products').insert(productData).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      productId = data.id;
+    }
+
+    // Upload images to storage
+    for (let i = 0; i < uploadedImages.length; i++) {
+      const img = uploadedImages[i];
+      const path = `${productId}/${Date.now()}-${i}.jpg`;
+      const { data: uploadData } = await supabase.storage.from('products').upload(path, img.file);
+      if (uploadData) {
+        const { data: urlData } = supabase.storage.from('products').getPublicUrl(path);
+        await supabase.from('product_images').insert({
+          product_id: productId,
+          image_url: urlData.publicUrl,
+          is_primary: i === 0,
+          display_order: i
+        });
+      }
+    }
+
+    // Update inventory
+    document.querySelectorAll('.size-stock').forEach(async input => {
+      const size = input.dataset.size;
+      const quantity = parseInt(input.value) || 0;
+      await supabase.from('inventory').upsert({ product_id: productId, size, quantity }, { onConflict: 'product_id,size' });
+    });
+
+    closeModal();
+    loadProducts();
+  });
+
+  // Filters
+  document.getElementById('product-search')?.addEventListener('input', () => { page = 0; loadProducts(); });
+  document.getElementById('category-filter')?.addEventListener('change', () => { page = 0; loadProducts(); });
+  document.getElementById('status-filter')?.addEventListener('change', () => { page = 0; loadProducts(); });
+
+  // Export CSV
+  document.getElementById('export-csv-btn')?.addEventListener('click', () => {
+    const rows = [['Name','Category','Price','Sale Price','Status','Created'].join(',')];
+    allProducts.forEach(p => {
+      rows.push([p.name, p.category_name || '', p.price, p.sale_price || '', p.is_active ? 'Active' : 'Inactive', p.created_at].join(','));
+    });
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'silent_products.csv';
+    a.click();
+  });
+
+  // Check for ?action=new
+  if (new URLSearchParams(window.location.search).get('action') === 'new') {
+    openModal();
+  }
+
+  loadDropdowns();
+  loadProducts();
+</script>
+</body>
+</html>
