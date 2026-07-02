@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SILENT_ — Premium Luxury Streetwear</title>
+  <meta name="description" content="SILENT_ — Premium luxury high-end streetwear. New collection available now.">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:title" content="SILENT_ — Premium Luxury Streetwear">
+  <meta property="og:description" content="Move in silence. Dress with intent.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/assets/images/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/home.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loader" role="status" aria-label="Loading SILENT_">
+  <div class="loader-logo" aria-hidden="true">SILENT<span>_</span></div>
+  <div class="loader-bar" aria-hidden="true"></div>
+</div>
+
+<!-- Navigation (injected by JS) -->
+<div id="nav-root"></div>
+
+<!-- Hero -->
+<section class="hero" aria-label="Hero">
+  <div class="hero__bg">
+    <div class="hero__bg-overlay"></div>
+  </div>
+  <div class="hero__content">
+    <div class="hero__eyebrow" data-reveal>
+      <span class="s-eyebrow">SS 2025 — New Collection</span>
+    </div>
+    <h1 class="hero__title" aria-label="Move in Silence">
+      <span class="hero__title-line" data-reveal>Move in</span>
+      <span class="hero__title-line hero__title-line--indent" data-reveal>Silence</span>
+    </h1>
+    <div class="hero__cta" data-reveal>
+      <a href="/pages/collections.html" class="s-btn s-btn--primary s-btn--lg">Explore Collection</a>
+      <a href="/pages/lookbook.html" class="s-btn s-btn--lg">View Lookbook</a>
+    </div>
+  </div>
+  <div class="hero__scroll" aria-hidden="true">
+    <div class="hero__scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- Ticker -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__inner">
+    <span>New Collection Available Now</span>
+    <span aria-hidden="true">✦</span>
+    <span>Free Shipping on Orders Over $200</span>
+    <span aria-hidden="true">✦</span>
+    <span>SILENT_ SS 2025</span>
+    <span aria-hidden="true">✦</span>
+    <span>Limited Edition Drops</span>
+    <span aria-hidden="true">✦</span>
+    <span>New Collection Available Now</span>
+    <span aria-hidden="true">✦</span>
+    <span>Free Shipping on Orders Over $200</span>
+    <span aria-hidden="true">✦</span>
+    <span>SILENT_ SS 2025</span>
+    <span aria-hidden="true">✦</span>
+    <span>Limited Edition Drops</span>
+    <span aria-hidden="true">✦</span>
+  </div>
+</div>
+
+<!-- Featured Collections -->
+<section class="s-section" id="collections-preview" aria-label="Collections">
+  <div class="collections-header" data-reveal>
+    <span class="s-eyebrow">Collections</span>
+    <h2 class="s-heading">The New Order</h2>
+  </div>
+  <div class="collections-grid" id="collections-grid" role="list">
+    <!-- Populated by JS -->
+    <div class="collection-placeholder" role="listitem"></div>
+    <div class="collection-placeholder" role="listitem"></div>
+    <div class="collection-placeholder" role="listitem"></div>
+  </div>
+</section>
+
+<!-- Latest Drop -->
+<section class="s-section" id="latest-drop" aria-label="Latest drop">
+  <div class="section-header" data-reveal>
+    <span class="s-eyebrow">New Arrivals</span>
+    <div class="section-header__row">
+      <h2 class="s-heading">Latest Drop</h2>
+      <a href="/pages/shop.html?filter=new" class="s-btn">View All →</a>
+    </div>
+  </div>
+  <div class="product-grid" id="new-arrivals" role="list">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- Brand Statement -->
+<section class="brand-statement" aria-label="Brand philosophy">
+  <div class="brand-statement__inner">
+    <div class="brand-statement__text" data-reveal>
+      <p class="brand-statement__quote">
+        "Designed for those who<br>move in silence."
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Best Sellers -->
+<section class="s-section" id="best-sellers" aria-label="Best sellers">
+  <div class="section-header" data-reveal>
+    <span class="s-eyebrow">Best Sellers</span>
+    <div class="section-header__row">
+      <h2 class="s-heading">Most Wanted</h2>
+      <a href="/pages/shop.html?filter=bestseller" class="s-btn">Shop Now →</a>
+    </div>
+  </div>
+  <div class="product-grid" id="best-sellers-grid" role="list">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- Lookbook Preview -->
+<section class="lookbook-preview" aria-label="Lookbook preview">
+  <div class="lookbook-preview__header s-section" data-reveal>
+    <span class="s-eyebrow">Lookbook</span>
+    <h2 class="s-heading">Visual Identity</h2>
+    <a href="/pages/lookbook.html" class="s-btn" style="margin-top:32px;">Explore Lookbook →</a>
+  </div>
+  <div class="lookbook-grid" id="lookbook-grid" role="list">
+    <!-- Populated by JS -->
+    <div class="lookbook-item lookbook-placeholder" role="listitem"></div>
+    <div class="lookbook-item lookbook-placeholder" role="listitem"></div>
+    <div class="lookbook-item lookbook-placeholder" role="listitem"></div>
+    <div class="lookbook-item lookbook-placeholder" role="listitem"></div>
+  </div>
+</section>
+
+<!-- Countdown -->
+<section class="countdown-section" id="countdown-section" style="display:none;" aria-label="Next drop countdown">
+  <div class="countdown-inner">
+    <span class="s-eyebrow">Next Drop</span>
+    <h2 class="s-subheading" id="countdown-label">Incoming</h2>
+    <div class="countdown-timer" id="countdown-timer" aria-live="polite">
+      <div class="countdown-unit"><span id="cd-d">00</span><label>Days</label></div>
+      <div class="countdown-sep" aria-hidden="true">:</div>
+      <div class="countdown-unit"><span id="cd-h">00</span><label>Hours</label></div>
+      <div class="countdown-sep" aria-hidden="true">:</div>
+      <div class="countdown-unit"><span id="cd-m">00</span><label>Min</label></div>
+      <div class="countdown-sep" aria-hidden="true">:</div>
+      <div class="countdown-unit"><span id="cd-s">00</span><label>Sec</label></div>
+    </div>
+  </div>
+</section>
+
+<!-- About Preview -->
+<section class="about-preview" aria-label="About SILENT_">
+  <div class="about-preview__inner s-section">
+    <div class="about-preview__content" data-reveal="left">
+      <span class="s-eyebrow">About SILENT_</span>
+      <h2 class="s-heading" style="font-size:clamp(28px,4vw,56px);">
+        Built on<br>Silence.
+      </h2>
+      <p class="s-body" style="margin:32px 0;max-width:480px;">
+        SILENT_ is a premium luxury streetwear brand born from the philosophy that true style speaks without words. Every piece is designed with intention, crafted with precision, and worn by those who understand that power is quiet.
+      </p>
+      <a href="/pages/about.html" class="s-btn">Our Story →</a>
+    </div>
+    <div class="about-preview__visual" data-reveal="right"></div>
+  </div>
+</section>
+
+<!-- Footer Root -->
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, initNewsletterPopup, initAccordions, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen, initWhatsAppButton, initNewsletterPopup as initNLPopup } from '/assets/js/utils.js';
+  import { supabase } from '/assets/js/supabase.js';
+  import { addToCart } from '/assets/js/cart.js';
+  import { toggleWishlist, isInWishlist } from '/assets/js/wishlist.js';
+  import { formatPrice } from '/assets/js/utils.js';
+
+  // Inject nav and footer
+  document.getElementById('nav-root').innerHTML = renderNav('home');
+
+  // Load settings then inject footer
+  loadSiteSettings().then(settings => {
+    document.getElementById('footer-root').innerHTML = renderFooter(settings);
+    // Set WhatsApp float link
+    const waBtn = document.getElementById('whatsapp-float');
+    if (waBtn && settings.whatsapp_url) {
+      waBtn.href = settings.whatsapp_url;
+    }
+  });
+
+  // Initialize global features
+  initLoadingScreen();
+  initCursor();
+  initScrollReveal();
+  initPageTransitions();
+  initNav();
+  initCart();
+  initSearch();
+  initNewsletterPopup();
+  initAccordions();
+  initWhatsAppButton();
+
+  // Newsletter popup (after 8s)
+  if (!sessionStorage.getItem('nl_shown')) {
+    setTimeout(() => {
+      document.getElementById('newsletter-popup')?.classList.add('active');
+      sessionStorage.setItem('nl_shown', '1');
+    }, 8000);
+  }
+
+  // Load collections
+  async function loadCollections() {
+    const { data } = await supabase
+      .from('collections')
+      .select('id, name, slug, description, cover_image')
+      .eq('is_active', true)
+      .order('display_order')
+      .limit(3);
+
+    const grid = document.getElementById('collections-grid');
+    if (!grid || !data?.length) return;
+
+    grid.innerHTML = data.map((col, i) => `
+      <a href="/pages/collections.html?slug=${col.slug}" class="collection-card ${i === 0 ? 'collection-card--large' : ''}" data-reveal role="listitem">
+        <div class="collection-card__image">
+          ${col.cover_image ? `<img src="${col.cover_image}" alt="${col.name}" loading="${i === 0 ? 'eager' : 'lazy'}">` : `<div class="collection-card__placeholder"></div>`}
+          <div class="collection-card__overlay"></div>
+        </div>
+        <div class="collection-card__content">
+          <span class="s-eyebrow" style="color:rgba(255,255,255,0.5)">Collection</span>
+          <h3 class="collection-card__name">${col.name}</h3>
+          <span class="collection-card__cta">Explore →</span>
+        </div>
+      </a>
+    `).join('');
+
+    initScrollReveal();
+  }
+
+  // Load products
+  async function loadProducts(filter, elementId, limit = 4) {
+    const query = supabase
+      .from('products')
+      .select('id, name, slug, price, sale_price, category_name, product_images(image_url, is_primary, display_order)')
+      .eq('is_active', true);
+
+    if (filter === 'new') query.order('created_at', { ascending: false });
+    else if (filter === 'bestseller') query.eq('is_bestseller', true);
+
+    const { data } = await query.limit(limit);
+    const el = document.getElementById(elementId);
+    if (!el || !data?.length) return;
+
+    el.innerHTML = data.map(p => {
+      const imgs = (p.product_images || []).sort((a, b) => a.display_order - b.display_order);
+      const primary = imgs.find(i => i.is_primary)?.image_url || imgs[0]?.image_url || '';
+      const alt = imgs[1]?.image_url || '';
+
+      return `
+      <article class="product-card" data-reveal role="listitem">
+        <div class="product-card__image-wrap">
+          <a href="/pages/product.html?slug=${p.slug}" aria-label="View ${p.name}">
+            ${primary ? `<img src="${primary}" alt="${p.name}" loading="lazy">` : `<div style="width:100%;height:100%;background:var(--bg-elevated)"></div>`}
+            ${alt ? `<img class="product-card__image-alt" src="${alt}" alt="${p.name} alternate view" loading="lazy">` : ''}
+          </a>
+          ${p.sale_price ? `<span class="product-card__badge">Sale</span>` : ''}
+          <div class="product-card__actions">
+            <button class="product-card__action-btn" data-wishlist-id="${p.id}" aria-label="Add to wishlist">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+            <a href="/pages/product.html?slug=${p.slug}" class="product-card__action-btn" aria-label="Quick view ${p.name}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="product-card__info">
+          <a href="/pages/product.html?slug=${p.slug}">
+            <h3 class="product-card__name">${p.name}</h3>
+          </a>
+          <div class="product-card__price">
+            ${p.sale_price ? `<s>${formatPrice(p.price)}</s><span class="sale">${formatPrice(p.sale_price)}</span>` : formatPrice(p.price)}
+          </div>
+        </div>
+      </article>`;
+    }).join('');
+
+    // Wishlist buttons
+    el.querySelectorAll('[data-wishlist-id]').forEach(async btn => {
+      const id = btn.dataset.wishlistId;
+      const inList = await isInWishlist(id);
+      if (inList) btn.classList.add('active');
+      btn.addEventListener('click', async () => {
+        const added = await toggleWishlist(id);
+        btn.classList.toggle('active', added);
+      });
+    });
+
+    initScrollReveal();
+  }
+
+  // Load lookbook
+  async function loadLookbook() {
+    const { data } = await supabase
+      .from('lookbook')
+      .select('id, image_url, caption')
+      .eq('is_active', true)
+      .order('display_order')
+      .limit(4);
+
+    const grid = document.getElementById('lookbook-grid');
+    if (!grid || !data?.length) return;
+
+    grid.innerHTML = data.map(item => `
+      <a href="/pages/lookbook.html" class="lookbook-item" data-reveal role="listitem">
+        <img src="${item.image_url}" alt="${item.caption || 'Lookbook'}" loading="lazy">
+        <div class="lookbook-item__overlay">
+          <span class="lookbook-item__caption">${item.caption || ''}</span>
+        </div>
+      </a>
+    `).join('');
+
+    initScrollReveal();
+  }
+
+  // Load countdown
+  async function loadCountdown() {
+    const { data } = await supabase
+      .from('website_settings')
+      .select('value')
+      .eq('key', 'next_drop_date')
+      .single();
+
+    if (!data?.value) return;
+
+    const target = new Date(data.value);
+    if (target <= new Date()) return;
+
+    const section = document.getElementById('countdown-section');
+    if (section) section.style.display = 'block';
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = target - now;
+      if (diff <= 0) return;
+
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      document.getElementById('cd-d').textContent = String(d).padStart(2, '0');
+      document.getElementById('cd-h').textContent = String(h).padStart(2, '0');
+      document.getElementById('cd-m').textContent = String(m).padStart(2, '0');
+      document.getElementById('cd-s').textContent = String(s).padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+
+  // Run all loaders
+  loadCollections();
+  loadProducts('new', 'new-arrivals', 4);
+  loadProducts('bestseller', 'best-sellers-grid', 4);
+  loadLookbook();
+  loadCountdown();
+</script>
+
+</body>
+</html>
