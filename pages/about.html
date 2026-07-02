@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — SILENT_</title>
+  <meta name="description" content="About SILENT_ — Premium luxury streetwear brand.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="padding-top:var(--nav-height);">
+
+  <!-- Hero -->
+  <header style="min-height:70vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:var(--spacing-2xl) var(--spacing-md);border-bottom:1px solid var(--border);">
+    <div>
+      <span class="s-eyebrow" data-reveal>Est. 2024</span>
+      <h1 class="s-heading" style="font-size:clamp(48px,8vw,112px);" data-reveal>About<br>SILENT_</h1>
+    </div>
+  </header>
+
+  <!-- Mission -->
+  <section class="s-section">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--spacing-xl);align-items:center;" id="mission-grid">
+      <div data-reveal="left">
+        <span class="s-eyebrow">Our Philosophy</span>
+        <h2 class="s-subheading" style="margin:16px 0 32px;">Built on Silence.</h2>
+        <p class="s-body" style="margin-bottom:24px;">
+          SILENT_ was born from a simple conviction: that true style doesn't demand attention. It commands it. We design for those who understand that power is quiet, presence is felt, and luxury is in the details that only the wearer knows.
+        </p>
+        <p class="s-body" style="margin-bottom:24px;">
+          Every piece in our collection is conceived with obsessive attention to proportion, material, and silhouette. We work with limited production runs, premium fabrications, and artisan construction to ensure that each garment is something worth keeping.
+        </p>
+        <p class="s-body">
+          This is not fast fashion. This is not for everyone. This is for those who move in silence.
+        </p>
+      </div>
+      <div style="aspect-ratio:4/5;background:var(--bg-elevated);position:relative;" data-reveal="right">
+        <div style="position:absolute;inset:-16px -16px 16px 16px;border:1px solid var(--border);pointer-events:none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg-card);">
+    <div class="s-section">
+      <span class="s-eyebrow" data-reveal>What We Stand For</span>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--spacing-lg);margin-top:var(--spacing-md);">
+        <div data-reveal>
+          <div style="font-size:32px;font-weight:100;letter-spacing:0.1em;margin-bottom:24px;">01</div>
+          <h3 style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:16px;font-weight:300;">Quality Over Everything</h3>
+          <p class="s-body" style="font-size:13px;">We source only the finest fabrics — Japanese selvedge, Italian wools, premium cotton blends — and partner with skilled artisans who share our obsession with craft.</p>
+        </div>
+        <div data-reveal>
+          <div style="font-size:32px;font-weight:100;letter-spacing:0.1em;margin-bottom:24px;">02</div>
+          <h3 style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:16px;font-weight:300;">Intentional Design</h3>
+          <p class="s-body" style="font-size:13px;">Nothing is accidental. Every seam, every drop, every proportion is considered. We remove until only what is essential remains. The result is clothing with purpose.</p>
+        </div>
+        <div data-reveal>
+          <div style="font-size:32px;font-weight:100;letter-spacing:0.1em;margin-bottom:24px;">03</div>
+          <h3 style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:16px;font-weight:300;">Limited. Always.</h3>
+          <p class="s-body" style="font-size:13px;">We never overproduce. Each drop is limited to preserve exclusivity and reduce waste. When it's gone, it's gone. This is how we respect both our customers and the planet.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Brand Statement -->
+  <section style="padding:var(--spacing-2xl) var(--spacing-md);text-align:center;">
+    <p style="font-size:clamp(20px,3.5vw,48px);font-weight:100;letter-spacing:0.06em;line-height:1.4;max-width:900px;margin:0 auto;color:rgba(255,255,255,0.6);" data-reveal>
+      "We don't chase trends.<br>We set the standard for those<br>who are already ahead."
+    </p>
+  </section>
+
+</main>
+
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen, initWhatsAppButton } from '/assets/js/utils.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('about');
+  loadSiteSettings().then(s => {
+    document.getElementById('footer-root').innerHTML = renderFooter(s);
+    const waBtn = document.getElementById('whatsapp-float');
+    if (waBtn && s.whatsapp_url) waBtn.href = s.whatsapp_url;
+  });
+  initLoadingScreen(); initCursor(); initScrollReveal(); initPageTransitions(); initNav(); initCart(); initSearch(); initWhatsAppButton();
+
+  // Responsive mission grid
+  if (window.innerWidth < 768) {
+    document.getElementById('mission-grid').style.gridTemplateColumns = '1fr';
+  }
+</script>
+</body>
+</html>

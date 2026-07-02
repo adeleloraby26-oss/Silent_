@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collections — SILENT_</title>
+  <meta name="description" content="Explore SILENT_ collections — curated luxury streetwear drops.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="padding-top:var(--nav-height);">
+  <header class="s-section" style="text-align:center;padding-bottom:0;">
+    <span class="s-eyebrow" data-reveal>Curated Drops</span>
+    <h1 class="s-heading" data-reveal>Collections</h1>
+  </header>
+
+  <div class="s-section" id="collections-container">
+    <!-- Populated by JS -->
+  </div>
+</main>
+
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen, initWhatsAppButton, formatPrice, getParam } from '/assets/js/utils.js';
+  import { supabase } from '/assets/js/supabase.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('collections');
+  loadSiteSettings().then(s => {
+    document.getElementById('footer-root').innerHTML = renderFooter(s);
+    const waBtn = document.getElementById('whatsapp-float');
+    if (waBtn && s.whatsapp_url) waBtn.href = s.whatsapp_url;
+  });
+  initLoadingScreen(); initCursor(); initScrollReveal(); initPageTransitions();
+  initNav(); initCart(); initSearch(); initWhatsAppButton();
+
+  const slugParam = getParam('slug');
+
+  async function loadCollections() {
+    const { data: collections } = await supabase
+      .from('collections')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order');
+
+    const container = document.getElementById('collections-container');
+    if (!collections?.length) return;
+
+    for (const col of collections) {
+      const { data: products } = await supabase
+        .from('products')
+        .select('id, name, slug, price, sale_price, product_images(image_url, is_primary)')
+        .eq('collection_slug', col.slug)
+        .eq('is_active', true)
+        .limit(slugParam === col.slug ? 100 : 4);
+
+      const section = document.createElement('section');
+      section.style.marginBottom = 'var(--spacing-2xl)';
+      section.innerHTML = `
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--spacing-md);flex-wrap:wrap;gap:16px;" data-reveal>
+          <div>
+            <span class="s-eyebrow">Collection</span>
+            <h2 class="s-subheading" style="margin-top:8px;">${col.name}</h2>
+            ${col.description ? `<p class="s-body" style="margin-top:12px;max-width:500px;">${col.description}</p>` : ''}
+          </div>
+          <a href="/pages/shop.html?collection=${col.slug}" class="s-btn">View All →</a>
+        </div>
+        <div class="product-grid" role="list">
+          ${(products || []).map(p => {
+            const img = p.product_images?.find(i => i.is_primary)?.image_url || p.product_images?.[0]?.image_url || '';
+            return `
+            <article class="product-card" data-reveal role="listitem">
+              <div class="product-card__image-wrap">
+                <a href="/pages/product.html?slug=${p.slug}">
+                  ${img ? `<img src="${img}" alt="${p.name}" loading="lazy">` : `<div style="width:100%;height:100%;background:var(--bg-elevated)"></div>`}
+                </a>
+              </div>
+              <div class="product-card__info">
+                <a href="/pages/product.html?slug=${p.slug}"><h3 class="product-card__name">${p.name}</h3></a>
+                <div class="product-card__price">${p.sale_price ? `<s>${formatPrice(p.price)}</s><span class="sale">${formatPrice(p.sale_price)}</span>` : formatPrice(p.price)}</div>
+              </div>
+            </article>`;
+          }).join('') || '<p class="s-body">No products in this collection yet.</p>'}
+        </div>
+      `;
+      container.appendChild(section);
+    }
+
+    initScrollReveal();
+  }
+
+  loadCollections();
+</script>
+</body>
+</html>

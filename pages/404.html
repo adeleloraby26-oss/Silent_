@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — SILENT_</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:var(--nav-height) var(--spacing-md) 0;text-align:center;">
+  <div>
+    <div style="font-size:clamp(120px,20vw,280px);font-weight:100;letter-spacing:0.02em;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,0.08);user-select:none;" aria-hidden="true">404</div>
+    <span class="s-eyebrow" style="display:block;margin-top:32px;">Page Not Found</span>
+    <h1 class="s-subheading" style="margin:16px 0 24px;font-size:clamp(24px,4vw,48px);">Lost in the Silence</h1>
+    <p class="s-body" style="max-width:420px;margin:0 auto 48px;">The page you're looking for doesn't exist, or has been moved. Let's get you back on track.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="/index.html" class="s-btn s-btn--primary s-btn--lg">Go Home</a>
+      <a href="/pages/shop.html" class="s-btn s-btn--lg">Shop Now</a>
+    </div>
+  </div>
+</main>
+
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen } from '/assets/js/utils.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('');
+  loadSiteSettings().then(s => document.getElementById('footer-root').innerHTML = renderFooter(s));
+  initLoadingScreen(); initCursor(); initScrollReveal(); initPageTransitions(); initNav(); initCart(); initSearch();
+</script>
+</body>
+</html>

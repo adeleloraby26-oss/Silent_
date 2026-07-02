@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lookbook — SILENT_</title>
+  <meta name="description" content="SILENT_ Lookbook — Visual Identity SS 2025">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/lookbook.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main>
+  <!-- Hero -->
+  <header class="lookbook-hero">
+    <div class="lookbook-hero__content">
+      <span class="s-eyebrow" data-reveal>SS 2025</span>
+      <h1 class="lookbook-hero__title" data-reveal>Lookbook</h1>
+      <p class="lookbook-hero__sub" data-reveal>Visual Identity</p>
+    </div>
+    <div class="lookbook-hero__scroll" aria-hidden="true">
+      <div class="hero__scroll-line"></div>
+    </div>
+  </header>
+
+  <!-- Gallery -->
+  <div class="lookbook-full-gallery" id="lookbook-gallery" role="list">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Editorial Sections populated by JS -->
+  <div id="editorial-sections"></div>
+
+  <!-- CTA -->
+  <section class="lookbook-cta s-section" aria-label="Shop the look">
+    <div class="lookbook-cta__inner" data-reveal>
+      <span class="s-eyebrow">Shop the Collection</span>
+      <h2 class="s-heading" style="margin:16px 0 40px;">Own the Look</h2>
+      <a href="/pages/shop.html" class="s-btn s-btn--primary s-btn--lg">Shop Now</a>
+    </div>
+  </section>
+</main>
+
+<div id="footer-root"></div>
+
+<!-- Lightbox -->
+<div class="lookbook-lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button class="lightbox__close" id="lightbox-close" aria-label="Close">✕</button>
+  <button class="lightbox__nav prev" id="lightbox-prev" aria-label="Previous image">‹</button>
+  <button class="lightbox__nav next" id="lightbox-next" aria-label="Next image">›</button>
+  <div class="lightbox__image-wrap">
+    <img id="lightbox-img" src="" alt="">
+  </div>
+  <div class="lightbox__caption" id="lightbox-caption"></div>
+</div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen, initWhatsAppButton } from '/assets/js/utils.js';
+  import { supabase } from '/assets/js/supabase.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('lookbook');
+  loadSiteSettings().then(s => {
+    document.getElementById('footer-root').innerHTML = renderFooter(s);
+    const waBtn = document.getElementById('whatsapp-float');
+    if (waBtn && s.whatsapp_url) waBtn.href = s.whatsapp_url;
+  });
+  initLoadingScreen(); initCursor(); initScrollReveal();
+  initPageTransitions(); initNav(); initCart(); initSearch(); initWhatsAppButton();
+
+  let images = [];
+  let currentIndex = 0;
+
+  async function loadLookbook() {
+    const { data } = await supabase
+      .from('lookbook')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order');
+
+    if (!data?.length) return;
+    images = data;
+
+    const gallery = document.getElementById('lookbook-gallery');
+
+    // Build varied editorial layout
+    gallery.innerHTML = data.map((item, i) => {
+      const large = i % 5 === 0 || i % 5 === 3;
+      return `
+      <div class="lookbook-gallery-item ${large ? 'lookbook-gallery-item--large' : ''}" data-index="${i}" role="listitem">
+        <img src="${item.image_url}" alt="${item.caption || 'SILENT_ Lookbook'}" loading="${i < 4 ? 'eager' : 'lazy'}">
+        <div class="lookbook-gallery-item__overlay">
+          ${item.caption ? `<p class="lookbook-gallery-item__caption">${item.caption}</p>` : ''}
+          <button class="lookbook-gallery-item__expand" aria-label="View full image">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Click to open lightbox
+    gallery.querySelectorAll('.lookbook-gallery-item').forEach(item => {
+      item.addEventListener('click', () => openLightbox(parseInt(item.dataset.index)));
+    });
+
+    initScrollReveal();
+  }
+
+  // Lightbox
+  function openLightbox(index) {
+    currentIndex = index;
+    const lightbox = document.getElementById('lightbox');
+    lightbox.classList.add('active');
+    updateLightbox();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function updateLightbox() {
+    const item = images[currentIndex];
+    if (!item) return;
+    const img = document.getElementById('lightbox-img');
+    img.style.opacity = '0';
+    setTimeout(() => {
+      img.src = item.image_url;
+      img.alt = item.caption || 'SILENT_ Lookbook';
+      img.onload = () => { img.style.opacity = '1'; };
+      document.getElementById('lightbox-caption').textContent = item.caption || '';
+    }, 150);
+  }
+
+  document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
+  document.getElementById('lightbox')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('lightbox')) closeLightbox();
+  });
+  document.getElementById('lightbox-prev')?.addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    updateLightbox();
+  });
+  document.getElementById('lightbox-next')?.addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % images.length;
+    updateLightbox();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('active')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') { currentIndex = (currentIndex - 1 + images.length) % images.length; updateLightbox(); }
+    if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % images.length; updateLightbox(); }
+  });
+
+  loadLookbook();
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart — SILENT_</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/cart-page.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="padding-top:var(--nav-height);">
+  <div class="s-section">
+    <h1 class="s-heading" style="margin-bottom:var(--spacing-lg);" data-reveal>Cart</h1>
+
+    <div class="cart-page-layout" id="cart-page-layout">
+      <!-- Cart Items -->
+      <div class="cart-page-items" id="cart-page-items"></div>
+
+      <!-- Summary -->
+      <aside class="cart-summary" id="cart-summary"></aside>
+    </div>
+
+    <!-- Empty State -->
+    <div class="cart-page-empty" id="cart-page-empty" style="display:none;">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" style="opacity:0.2;" aria-hidden="true">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      <p class="s-eyebrow" style="margin-top:32px;">Your cart is empty</p>
+      <p class="s-body" style="margin-top:12px;">Add some pieces to get started.</p>
+      <a href="/pages/shop.html" class="s-btn" style="margin-top:32px;">Continue Shopping</a>
+    </div>
+  </div>
+</main>
+
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen, initWhatsAppButton, formatPrice } from '/assets/js/utils.js';
+  import { getCart, removeFromCart, updateQuantity, getCartTotal, getCartCount } from '/assets/js/cart.js';
+  import { supabase } from '/assets/js/supabase.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('');
+  loadSiteSettings().then(s => {
+    document.getElementById('footer-root').innerHTML = renderFooter(s);
+    const waBtn = document.getElementById('whatsapp-float');
+    if (waBtn && s.whatsapp_url) waBtn.href = s.whatsapp_url;
+  });
+
+  initLoadingScreen(); initCursor(); initScrollReveal();
+  initPageTransitions(); initNav(); initCart(); initSearch(); initWhatsAppButton();
+
+  let couponDiscount = 0;
+  let couponCode = '';
+
+  function renderCart() {
+    const cart = getCart();
+    const layout = document.getElementById('cart-page-layout');
+    const empty = document.getElementById('cart-page-empty');
+
+    if (!cart.length) {
+      layout.style.display = 'none';
+      empty.style.display = 'flex';
+      return;
+    }
+    layout.style.display = 'grid';
+    empty.style.display = 'none';
+
+    // Items
+    const itemsEl = document.getElementById('cart-page-items');
+    itemsEl.innerHTML = `
+      <div class="cart-page-header">
+        <span>Product</span>
+        <span>Size</span>
+        <span>Quantity</span>
+        <span>Total</span>
+      </div>
+      <div class="s-divider"></div>
+      ${cart.map(item => `
+        <div class="cart-page-item" data-key="${item.key}">
+          <div class="cart-page-item__product">
+            <div class="cart-page-item__image">
+              ${item.image ? `<img src="${item.image}" alt="${item.name}" loading="lazy">` : ''}
+            </div>
+            <div class="cart-page-item__info">
+              <a href="/pages/product.html?slug=${item.slug}" class="cart-page-item__name">${item.name}</a>
+              <p class="cart-page-item__price">${formatPrice(item.sale_price || item.price)}</p>
+              <button class="cart-page-item__remove" data-key="${item.key}">Remove</button>
+            </div>
+          </div>
+          <div class="cart-page-item__size">${item.size}</div>
+          <div class="cart-page-item__qty">
+            <div class="qty-control">
+              <button class="qty-minus" data-key="${item.key}" aria-label="Decrease quantity">−</button>
+              <input type="number" value="${item.quantity}" min="1" max="10" data-key="${item.key}" aria-label="Quantity for ${item.name}">
+              <button class="qty-plus" data-key="${item.key}" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+          <div class="cart-page-item__total">${formatPrice((item.sale_price || item.price) * item.quantity)}</div>
+        </div>
+        <div class="s-divider"></div>
+      `).join('')}
+    `;
+
+    // Event listeners
+    itemsEl.querySelectorAll('.cart-page-item__remove').forEach(btn => {
+      btn.addEventListener('click', () => { removeFromCart(btn.dataset.key); renderCart(); });
+    });
+    itemsEl.querySelectorAll('.qty-minus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = getCart().find(i => i.key === btn.dataset.key);
+        if (item) { updateQuantity(btn.dataset.key, item.quantity - 1); renderCart(); }
+      });
+    });
+    itemsEl.querySelectorAll('.qty-plus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = getCart().find(i => i.key === btn.dataset.key);
+        if (item) { updateQuantity(btn.dataset.key, item.quantity + 1); renderCart(); }
+      });
+    });
+    itemsEl.querySelectorAll('input[type="number"]').forEach(input => {
+      input.addEventListener('change', () => {
+        const val = parseInt(input.value);
+        if (val > 0 && val <= 10) { updateQuantity(input.dataset.key, val); renderCart(); }
+      });
+    });
+
+    renderSummary();
+  }
+
+  function renderSummary() {
+    const subtotal = getCartTotal();
+    const shipping = subtotal >= 200 ? 0 : 15;
+    const tax = (subtotal - couponDiscount) * 0.08;
+    const total = subtotal - couponDiscount + shipping + tax;
+
+    document.getElementById('cart-summary').innerHTML = `
+      <div class="cart-summary-box">
+        <h2 class="cart-summary__title">Order Summary</h2>
+
+        <div class="cart-summary__row">
+          <span>Subtotal</span>
+          <span>${formatPrice(subtotal)}</span>
+        </div>
+        ${couponDiscount > 0 ? `
+        <div class="cart-summary__row" style="color:var(--success);">
+          <span>Coupon (${couponCode})</span>
+          <span>−${formatPrice(couponDiscount)}</span>
+        </div>` : ''}
+        <div class="cart-summary__row">
+          <span>Shipping</span>
+          <span>${shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
+        </div>
+        <div class="cart-summary__row">
+          <span>Estimated Tax</span>
+          <span>${formatPrice(tax)}</span>
+        </div>
+        <div class="s-divider" style="margin:16px 0;"></div>
+        <div class="cart-summary__row cart-summary__total">
+          <span>Total</span>
+          <span>${formatPrice(total)}</span>
+        </div>
+
+        <!-- Coupon -->
+        <div class="cart-coupon">
+          <input type="text" id="coupon-input" class="s-input" placeholder="Coupon code" aria-label="Coupon code" style="font-size:12px;padding:14px;">
+          <button id="coupon-apply" class="s-btn" style="padding:14px 20px;font-size:10px;flex-shrink:0;">Apply</button>
+        </div>
+        <p id="coupon-msg" style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;margin-top:8px;display:none;"></p>
+
+        <a href="/pages/checkout.html" class="s-btn s-btn--primary s-btn--full" style="padding:20px;margin-top:24px;">Proceed to Checkout</a>
+        <a href="/pages/shop.html" class="s-btn s-btn--full" style="padding:16px;margin-top:12px;">Continue Shopping</a>
+
+        ${subtotal < 200 ? `<p class="cart-free-shipping-msg">Add ${formatPrice(200 - subtotal)} more for <strong>free shipping</strong></p>` : '<p class="cart-free-shipping-msg" style="color:var(--success);">✓ You qualify for free shipping</p>'}
+      </div>
+    `;
+
+    document.getElementById('coupon-apply')?.addEventListener('click', applyCoupon);
+    document.getElementById('coupon-input')?.addEventListener('keypress', e => {
+      if (e.key === 'Enter') applyCoupon();
+    });
+  }
+
+  async function applyCoupon() {
+    const code = document.getElementById('coupon-input')?.value?.trim()?.toUpperCase();
+    const msg = document.getElementById('coupon-msg');
+    if (!code || !msg) return;
+
+    const { data } = await supabase
+      .from('coupons')
+      .select('*')
+      .eq('code', code)
+      .eq('is_active', true)
+      .single();
+
+    msg.style.display = 'block';
+    if (!data) {
+      msg.style.color = 'var(--error)';
+      msg.textContent = 'Invalid coupon code.';
+      return;
+    }
+
+    const now = new Date();
+    if (data.expires_at && new Date(data.expires_at) < now) {
+      msg.style.color = 'var(--error)';
+      msg.textContent = 'This coupon has expired.';
+      return;
+    }
+
+    const subtotal = getCartTotal();
+    if (data.minimum_amount && subtotal < data.minimum_amount) {
+      msg.style.color = 'var(--error)';
+      msg.textContent = `Minimum order of ${formatPrice(data.minimum_amount)} required.`;
+      return;
+    }
+
+    couponCode = code;
+    couponDiscount = data.type === 'percentage'
+      ? subtotal * (data.value / 100)
+      : Math.min(data.value, subtotal);
+
+    msg.style.color = 'var(--success)';
+    msg.textContent = `Coupon applied! You saved ${formatPrice(couponDiscount)}.`;
+    renderSummary();
+  }
+
+  renderCart();
+  window.addEventListener('cartUpdated', renderCart);
+</script>
+</body>
+</html>

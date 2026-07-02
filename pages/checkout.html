@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout — SILENT_</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/checkout.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+
+<!-- Minimal Checkout Nav -->
+<nav class="checkout-nav" aria-label="Checkout navigation">
+  <a href="/index.html" class="s-nav__logo">SILENT<span style="opacity:0.4">_</span></a>
+  <div class="checkout-steps" aria-label="Checkout progress" role="list">
+    <span class="checkout-step active" role="listitem" aria-current="step">Information</span>
+    <span class="checkout-step-sep" aria-hidden="true">›</span>
+    <span class="checkout-step" role="listitem">Shipping</span>
+    <span class="checkout-step-sep" aria-hidden="true">›</span>
+    <span class="checkout-step" role="listitem">Payment</span>
+  </div>
+  <a href="/pages/cart.html" class="checkout-nav__back">← Back to cart</a>
+</nav>
+
+<main class="checkout-main">
+  <div class="checkout-layout">
+
+    <!-- Left: Form -->
+    <section class="checkout-form-section" aria-label="Checkout form">
+      <div id="checkout-form-wrap">
+
+        <!-- Contact -->
+        <div class="checkout-block" id="block-contact">
+          <h2 class="checkout-block__title">Contact</h2>
+          <div class="s-field">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="s-input" placeholder="your@email.com" autocomplete="email" required>
+          </div>
+          <label class="checkout-checkbox" style="margin-top:16px;">
+            <input type="checkbox" id="newsletter-opt" checked>
+            <span>Subscribe for exclusive access and early drops</span>
+          </label>
+        </div>
+
+        <div class="s-divider" style="margin:var(--spacing-md) 0;"></div>
+
+        <!-- Shipping Address -->
+        <div class="checkout-block" id="block-shipping">
+          <h2 class="checkout-block__title">Shipping Address</h2>
+          <div class="form-grid-2">
+            <div class="s-field">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" class="s-input" placeholder="First name" autocomplete="given-name" required>
+            </div>
+            <div class="s-field">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" class="s-input" placeholder="Last name" autocomplete="family-name" required>
+            </div>
+          </div>
+          <div class="s-field" style="margin-top:16px;">
+            <label for="address">Address</label>
+            <input type="text" id="address" class="s-input" placeholder="Street address" autocomplete="street-address" required>
+          </div>
+          <div class="s-field" style="margin-top:16px;">
+            <label for="address2">Apartment, suite, etc. (optional)</label>
+            <input type="text" id="address2" class="s-input" placeholder="Apt, suite, unit..." autocomplete="address-line2">
+          </div>
+          <div class="form-grid-3" style="margin-top:16px;">
+            <div class="s-field">
+              <label for="city">City</label>
+              <input type="text" id="city" class="s-input" placeholder="City" autocomplete="address-level2" required>
+            </div>
+            <div class="s-field">
+              <label for="state">State / Province</label>
+              <input type="text" id="state" class="s-input" placeholder="State" autocomplete="address-level1" required>
+            </div>
+            <div class="s-field">
+              <label for="zip">ZIP / Postal Code</label>
+              <input type="text" id="zip" class="s-input" placeholder="ZIP code" autocomplete="postal-code" required>
+            </div>
+          </div>
+          <div class="s-field" style="margin-top:16px;">
+            <label for="country">Country</label>
+            <select id="country" class="s-input s-select" autocomplete="country" required>
+              <option value="">Select country</option>
+              <option value="US">United States</option>
+              <option value="GB">United Kingdom</option>
+              <option value="CA">Canada</option>
+              <option value="AU">Australia</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="AE">UAE</option>
+              <option value="SA">Saudi Arabia</option>
+              <option value="EG">Egypt</option>
+            </select>
+          </div>
+          <div class="s-field" style="margin-top:16px;">
+            <label for="phone">Phone (optional)</label>
+            <input type="tel" id="phone" class="s-input" placeholder="+1 000 000 0000" autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="s-divider" style="margin:var(--spacing-md) 0;"></div>
+
+        <!-- Shipping Method -->
+        <div class="checkout-block" id="block-shipping-method">
+          <h2 class="checkout-block__title">Shipping Method</h2>
+          <div class="shipping-methods" role="radiogroup" aria-label="Shipping method">
+            <label class="shipping-method" id="method-standard">
+              <input type="radio" name="shipping" value="standard" checked>
+              <div class="shipping-method__info">
+                <span class="shipping-method__name">Standard Shipping</span>
+                <span class="shipping-method__time">3–7 business days</span>
+              </div>
+              <span class="shipping-method__price" id="standard-price">$15.00</span>
+            </label>
+            <label class="shipping-method" id="method-express">
+              <input type="radio" name="shipping" value="express">
+              <div class="shipping-method__info">
+                <span class="shipping-method__name">Express Shipping</span>
+                <span class="shipping-method__time">1–3 business days</span>
+              </div>
+              <span class="shipping-method__price">$35.00</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="s-divider" style="margin:var(--spacing-md) 0;"></div>
+
+        <!-- Payment Placeholder -->
+        <div class="checkout-block" id="block-payment">
+          <h2 class="checkout-block__title">Payment</h2>
+          <div class="payment-placeholder">
+            <div class="payment-placeholder__icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <p class="payment-placeholder__text">Secure payment processing</p>
+            <p class="payment-placeholder__sub">Integrate Stripe, PayPal, or your payment gateway here.</p>
+          </div>
+          <div class="form-grid-2">
+            <div class="s-field" style="grid-column:1/-1;">
+              <label for="card-number">Card Number</label>
+              <input type="text" id="card-number" class="s-input" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
+            </div>
+            <div class="s-field">
+              <label for="card-expiry">Expiry Date</label>
+              <input type="text" id="card-expiry" class="s-input" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp">
+            </div>
+            <div class="s-field">
+              <label for="card-cvc">CVC</label>
+              <input type="text" id="card-cvc" class="s-input" placeholder="123" maxlength="4" autocomplete="cc-csc">
+            </div>
+            <div class="s-field" style="grid-column:1/-1;">
+              <label for="card-name">Name on Card</label>
+              <input type="text" id="card-name" class="s-input" placeholder="Full name" autocomplete="cc-name">
+            </div>
+          </div>
+        </div>
+
+        <p id="checkout-error" style="display:none;color:var(--error);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-top:16px;" role="alert"></p>
+
+        <button class="s-btn s-btn--primary s-btn--full" id="place-order-btn" style="padding:22px;margin-top:var(--spacing-md);font-size:12px;" type="button">
+          Place Order
+        </button>
+        <p style="font-size:10px;color:var(--text-muted);letter-spacing:0.08em;text-align:center;margin-top:16px;">
+          By placing your order you agree to our <a href="/pages/terms.html" style="color:var(--text-secondary);text-decoration:underline;">Terms of Service</a> and <a href="/pages/privacy.html" style="color:var(--text-secondary);text-decoration:underline;">Privacy Policy</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Right: Order Summary -->
+    <aside class="checkout-summary" aria-label="Order summary">
+      <div class="checkout-summary__inner">
+        <h2 class="checkout-block__title" style="margin-bottom:var(--spacing-sm);">Order Summary</h2>
+        <div id="checkout-items"></div>
+        <div class="s-divider" style="margin:var(--spacing-sm) 0;"></div>
+        <div id="checkout-totals"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script type="module">
+  import { initCursor, initLoadingScreen, formatPrice } from '/assets/js/utils.js';
+  import { getCart, getCartTotal, clearCart } from '/assets/js/cart.js';
+  import { supabase, getCurrentUser } from '/assets/js/supabase.js';
+
+  initLoadingScreen();
+  initCursor();
+
+  const cart = getCart();
+  if (!cart.length) window.location.href = '/pages/cart.html';
+
+  function getShippingCost() {
+    const method = document.querySelector('[name="shipping"]:checked')?.value;
+    const subtotal = getCartTotal();
+    if (subtotal >= 200) return 0;
+    return method === 'express' ? 35 : 15;
+  }
+
+  function renderSummary() {
+    const subtotal = getCartTotal();
+    const shipping = getShippingCost();
+    const tax = subtotal * 0.08;
+    const total = subtotal + shipping + tax;
+
+    document.getElementById('checkout-items').innerHTML = cart.map(item => `
+      <div class="checkout-item">
+        <div class="checkout-item__image">
+          ${item.image ? `<img src="${item.image}" alt="${item.name}" loading="lazy">` : ''}
+          <span class="checkout-item__qty" aria-label="Quantity: ${item.quantity}">${item.quantity}</span>
+        </div>
+        <div class="checkout-item__info">
+          <span class="checkout-item__name">${item.name}</span>
+          <span class="checkout-item__size">${item.size}</span>
+        </div>
+        <span class="checkout-item__price">${formatPrice((item.sale_price || item.price) * item.quantity)}</span>
+      </div>
+    `).join('');
+
+    document.getElementById('checkout-totals').innerHTML = `
+      <div class="summary-row"><span>Subtotal</span><span>${formatPrice(subtotal)}</span></div>
+      <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? 'Free' : formatPrice(shipping)}</span></div>
+      <div class="summary-row"><span>Tax (8%)</span><span>${formatPrice(tax)}</span></div>
+      <div class="s-divider" style="margin:12px 0;"></div>
+      <div class="summary-row summary-row--total"><span>Total</span><span>${formatPrice(total)}</span></div>
+    `;
+  }
+
+  document.querySelectorAll('[name="shipping"]').forEach(radio => {
+    radio.addEventListener('change', renderSummary);
+  });
+
+  // Free shipping for subtotal >= 200
+  if (getCartTotal() >= 200) {
+    document.getElementById('standard-price').textContent = 'Free';
+  }
+
+  renderSummary();
+
+  // Place Order
+  document.getElementById('place-order-btn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('place-order-btn');
+    const errEl = document.getElementById('checkout-error');
+
+    // Validate
+    const required = ['email','first-name','last-name','address','city','state','zip','country'];
+    for (const id of required) {
+      const el = document.getElementById(id);
+      if (!el?.value?.trim()) {
+        errEl.textContent = `Please fill in all required fields.`;
+        errEl.style.display = 'block';
+        el?.focus();
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+
+    errEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+
+    try {
+      const user = await getCurrentUser();
+      const subtotal = getCartTotal();
+      const shipping = getShippingCost();
+      const tax = subtotal * 0.08;
+      const total = subtotal + shipping + tax;
+
+      const orderData = {
+        user_id: user?.id || null,
+        email: document.getElementById('email').value.trim(),
+        status: 'pending',
+        subtotal,
+        shipping_cost: shipping,
+        tax,
+        total,
+        shipping_address: {
+          first_name: document.getElementById('first-name').value.trim(),
+          last_name: document.getElementById('last-name').value.trim(),
+          address: document.getElementById('address').value.trim(),
+          address2: document.getElementById('address2').value.trim(),
+          city: document.getElementById('city').value.trim(),
+          state: document.getElementById('state').value.trim(),
+          zip: document.getElementById('zip').value.trim(),
+          country: document.getElementById('country').value,
+          phone: document.getElementById('phone').value.trim()
+        },
+        shipping_method: document.querySelector('[name="shipping"]:checked')?.value || 'standard',
+        items: cart.map(item => ({
+          product_id: item.id,
+          name: item.name,
+          size: item.size,
+          quantity: item.quantity,
+          price: item.sale_price || item.price
+        }))
+      };
+
+      const { data: order, error } = await supabase
+        .from('orders')
+        .insert({
+          user_id: orderData.user_id,
+          email: orderData.email,
+          status: orderData.status,
+          subtotal: orderData.subtotal,
+          shipping_cost: orderData.shipping_cost,
+          tax: orderData.tax,
+          total: orderData.total,
+          shipping_address: orderData.shipping_address,
+          shipping_method: orderData.shipping_method
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Insert order items
+      await supabase.from('order_items').insert(
+        orderData.items.map(i => ({ ...i, order_id: order.id }))
+      );
+
+      // Newsletter opt-in
+      if (document.getElementById('newsletter-opt')?.checked) {
+        await supabase.from('newsletter').upsert({ email: orderData.email });
+      }
+
+      clearCart();
+      window.location.href = `/pages/order-confirmation.html?id=${order.id}`;
+
+    } catch (err) {
+      console.error(err);
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Place Order';
+    }
+  });
+</script>
+</body>
+</html>

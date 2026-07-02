@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed — SILENT_</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="padding-top:var(--nav-height);min-height:80vh;display:flex;align-items:center;justify-content:center;">
+  <div class="confirmation-box" id="confirmation-box" style="text-align:center;max-width:560px;padding:var(--spacing-lg) var(--spacing-md);">
+    <div class="confirmation-icon" aria-hidden="true">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.75">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+    <span class="s-eyebrow" style="display:block;margin-top:32px;">Order Confirmed</span>
+    <h1 class="s-heading" style="font-size:clamp(32px,5vw,56px);margin:16px 0 24px;">Thank You</h1>
+    <p class="s-body" id="confirmation-text">Your order has been placed successfully. A confirmation email will be sent shortly.</p>
+    <div id="order-details" style="margin:40px 0;text-align:left;border:1px solid var(--border);padding:var(--spacing-md);background:var(--bg-card);">
+      <!-- Populated by JS -->
+    </div>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="/auth/orders.html" class="s-btn">View Orders</a>
+      <a href="/pages/shop.html" class="s-btn s-btn--primary">Continue Shopping</a>
+    </div>
+  </div>
+</main>
+
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initLoadingScreen, initPageTransitions, getParam, formatPrice } from '/assets/js/utils.js';
+  import { supabase } from '/assets/js/supabase.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('');
+  loadSiteSettings().then(s => document.getElementById('footer-root').innerHTML = renderFooter(s));
+  initLoadingScreen(); initCursor(); initPageTransitions(); initNav(); initCart(); initSearch();
+
+  const orderId = getParam('id');
+  if (orderId) {
+    supabase.from('orders').select('*, order_items(*)').eq('id', orderId).single()
+      .then(({ data }) => {
+        if (!data) return;
+        document.getElementById('confirmation-text').textContent =
+          `Your order #${data.id.slice(0,8).toUpperCase()} has been confirmed. We'll email you at ${data.email} once it ships.`;
+        document.getElementById('order-details').innerHTML = `
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+            <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);">Order Number</span>
+            <span style="font-size:12px;letter-spacing:0.1em;">#${data.id.slice(0,8).toUpperCase()}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+            <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);">Date</span>
+            <span style="font-size:12px;">${new Date(data.created_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+            <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);">Total</span>
+            <span style="font-size:14px;">${formatPrice(data.total)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);">Status</span>
+            <span style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;">${data.status}</span>
+          </div>
+        `;
+      });
+  }
+</script>
+</body>
+</html>

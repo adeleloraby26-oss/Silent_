@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wishlist — SILENT_</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="padding-top:var(--nav-height);min-height:80vh;">
+  <div class="s-section">
+    <h1 class="s-heading" style="margin-bottom:var(--spacing-lg);" data-reveal>Wishlist</h1>
+    <div class="product-grid" id="wishlist-grid" role="list"></div>
+    <div id="wishlist-empty" style="display:none;text-align:center;padding:var(--spacing-2xl) 0;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" style="opacity:0.2;margin:0 auto 32px;display:block;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <p class="s-eyebrow">Your wishlist is empty</p>
+      <a href="/pages/shop.html" class="s-btn" style="margin-top:32px;">Browse Products</a>
+    </div>
+  </div>
+</main>
+
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen, initWhatsAppButton, formatPrice } from '/assets/js/utils.js';
+  import { getWishlist, removeFromWishlist } from '/assets/js/wishlist.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('');
+  loadSiteSettings().then(s => document.getElementById('footer-root').innerHTML = renderFooter(s));
+  initLoadingScreen(); initCursor(); initScrollReveal(); initPageTransitions(); initNav(); initCart(); initSearch(); initWhatsAppButton();
+
+  async function loadWishlistPage() {
+    const items = await getWishlist();
+    const grid = document.getElementById('wishlist-grid');
+    const empty = document.getElementById('wishlist-empty');
+
+    if (!items.length) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    grid.innerHTML = items.map(item => {
+      const p = item.products || item;
+      const productId = p.id || item.product_id;
+      return `
+      <article class="product-card" role="listitem">
+        <div class="product-card__image-wrap">
+          <a href="/pages/product.html?slug=${p.slug}">
+            ${p.image ? `<img src="${p.image}" alt="${p.name}" loading="lazy">` : `<div style="width:100%;height:100%;background:var(--bg-elevated)"></div>`}
+          </a>
+          <div class="product-card__actions" style="opacity:1;transform:none;">
+            <button class="product-card__action-btn active" data-remove="${productId}" aria-label="Remove from wishlist">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="product-card__info">
+          <a href="/pages/product.html?slug=${p.slug}"><h3 class="product-card__name">${p.name}</h3></a>
+          <div class="product-card__price">${formatPrice(p.sale_price || p.price)}</div>
+        </div>
+      </article>`;
+    }).join('');
+
+    grid.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await removeFromWishlist(btn.dataset.remove);
+        loadWishlistPage();
+      });
+    });
+  }
+
+  loadWishlistPage();
+</script>
+</body>
+</html>

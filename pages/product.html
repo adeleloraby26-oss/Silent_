@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product — SILENT_</title>
+  <meta name="description" content="Premium SILENT_ product.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/product.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="padding-top:var(--nav-height);" id="product-main">
+  <div class="product-loading" id="product-loading">
+    <div class="shop-spinner"></div>
+  </div>
+</main>
+
+<div id="footer-root"></div>
+
+<style>
+.shop-spinner{width:24px;height:24px;border:1px solid var(--border);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+.product-loading{display:flex;align-items:center;justify-content:center;min-height:80vh;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings, initAccordions } from '/assets/js/nav.js';
+  import { initCursor, initScrollReveal, initPageTransitions, initLoadingScreen, initWhatsAppButton, formatPrice, getParam, toast, trackRecentlyViewed, getRecentlyViewed } from '/assets/js/utils.js';
+  import { supabase } from '/assets/js/supabase.js';
+  import { addToCart } from '/assets/js/cart.js';
+  import { toggleWishlist, isInWishlist } from '/assets/js/wishlist.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('');
+  loadSiteSettings().then(s => {
+    document.getElementById('footer-root').innerHTML = renderFooter(s);
+    const waBtn = document.getElementById('whatsapp-float');
+    if (waBtn && s.whatsapp_url) waBtn.href = s.whatsapp_url;
+  });
+  initLoadingScreen(); initCursor(); initScrollReveal();
+  initPageTransitions(); initNav(); initCart(); initSearch(); initWhatsAppButton();
+
+  const slug = getParam('slug');
+  if (!slug) window.location.href = '/pages/shop.html';
+
+  let selectedSize = null;
+  let product = null;
+
+  async function loadProduct() {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        product_images(image_url, is_primary, display_order, alt_text),
+        inventory(size, quantity),
+        reviews(id, rating, comment, created_at, profiles(full_name))
+      `)
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single();
+
+    document.getElementById('product-loading')?.remove();
+
+    if (error || !data) {
+      document.getElementById('product-main').innerHTML = `
+        <div style="text-align:center;padding:var(--spacing-2xl) var(--spacing-md);">
+          <p class="s-eyebrow">Not Found</p>
+          <h1 class="s-heading" style="font-size:48px;margin:24px 0;">Product Not Found</h1>
+          <a href="/pages/shop.html" class="s-btn" style="margin-top:24px;">Back to Shop</a>
+        </div>`;
+      return;
+    }
+
+    product = data;
+    trackRecentlyViewed({ id: data.id, name: data.name, slug: data.slug, price: data.price, sale_price: data.sale_price, image: data.product_images?.find(i => i.is_primary)?.image_url });
+
+    // Update page title and meta
+    document.title = `${data.name} — SILENT_`;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', data.description || `${data.name} — SILENT_ premium streetwear`);
+
+    const images = (data.product_images || []).sort((a, b) => a.display_order - b.display_order);
+    const inventory = data.inventory || [];
+    const reviews = data.reviews || [];
+    const avgRating = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : null;
+
+    const inWishlist = await isInWishlist(data.id);
+
+    document.getElementById('product-main').innerHTML = `
+    <div class="product-page">
+      <!-- Breadcrumb -->
+      <div class="product-breadcrumb">
+        <nav class="s-breadcrumb" aria-label="Breadcrumb">
+          <a href="/index.html">Home</a>
+          <span class="s-breadcrumb__sep" aria-hidden="true">—</span>
+          <a href="/pages/shop.html">Shop</a>
+          <span class="s-breadcrumb__sep" aria-hidden="true">—</span>
+          <span>${data.name}</span>
+        </nav>
+      </div>
+
+      <div class="product-layout">
+        <!-- Gallery -->
+        <aside class="product-gallery" aria-label="Product images">
+          <div class="product-gallery__thumbs" id="thumbs" role="list">
+            ${images.map((img, i) => `
+              <button class="product-gallery__thumb ${i === 0 ? 'active' : ''}" data-index="${i}" aria-label="View image ${i + 1}" role="listitem">
+                <img src="${img.image_url}" alt="${img.alt_text || data.name}" loading="lazy">
+              </button>
+            `).join('')}
+          </div>
+          <div class="product-gallery__main" id="main-image-wrap">
+            <div class="product-gallery__zoom" id="zoom-wrap">
+              ${images[0] ? `<img id="main-image" src="${images[0].image_url}" alt="${data.name}" loading="eager">` : `<div class="product-gallery__placeholder"></div>`}
+            </div>
+            <button class="product-gallery__nav prev" id="prev-img" aria-label="Previous image">‹</button>
+            <button class="product-gallery__nav next" id="next-img" aria-label="Next image">›</button>
+          </div>
+        </aside>
+
+        <!-- Info -->
+        <section class="product-info" aria-label="Product details">
+          <div class="product-info__header">
+            <div>
+              <p class="product-info__category">${data.category_name || ''}</p>
+              <h1 class="product-info__name">${data.name}</h1>
+            </div>
+            <button class="product-wishlist-btn ${inWishlist ? 'active' : ''}" id="wishlist-btn" aria-label="${inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}" aria-pressed="${inWishlist}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="${inWishlist ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          </div>
+
+          ${avgRating ? `
+          <div class="product-rating" aria-label="Rating: ${avgRating} out of 5">
+            <div class="stars" aria-hidden="true">${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5 - Math.round(avgRating))}</div>
+            <span>(${reviews.length} review${reviews.length !== 1 ? 's' : ''})</span>
+          </div>` : ''}
+
+          <div class="product-price">
+            ${data.sale_price
+              ? `<span class="product-price__original" aria-label="Original price: ${formatPrice(data.price)}">${formatPrice(data.price)}</span>
+                 <span class="product-price__sale" aria-label="Sale price: ${formatPrice(data.sale_price)}">${formatPrice(data.sale_price)}</span>
+                 <span class="product-price__save">Save ${Math.round((1 - data.sale_price / data.price) * 100)}%</span>`
+              : `<span aria-label="Price: ${formatPrice(data.price)}">${formatPrice(data.price)}</span>`
+            }
+          </div>
+
+          <!-- Size Selector -->
+          <div class="product-size-selector">
+            <div class="product-size-header">
+              <span class="product-size-label">Select Size</span>
+              <a href="#" class="product-size-guide" aria-label="Size guide">Size Guide</a>
+            </div>
+            <div class="size-grid" role="group" aria-label="Size selection" id="size-grid">
+              ${['XS', 'S', 'M', 'L', 'XL', 'XXL'].map(size => {
+                const inv = inventory.find(i => i.size === size);
+                const qty = inv?.quantity || 0;
+                return `<button class="size-btn ${qty === 0 ? 'disabled' : ''}" ${qty === 0 ? 'disabled aria-disabled="true"' : ''} data-size="${size}" aria-label="Size ${size}${qty === 0 ? ' - Out of stock' : ''}">${size}</button>`;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Stock Indicator -->
+          ${inventory.some(i => i.quantity > 0 && i.quantity <= 5) ? `<p class="product-stock-warning" role="alert">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+            Only a few left
+          </p>` : ''}
+
+          <!-- Quantity -->
+          <div class="product-qty-row">
+            <div class="qty-control" role="group" aria-label="Quantity">
+              <button id="qty-minus" aria-label="Decrease quantity">−</button>
+              <input type="number" id="qty-input" value="1" min="1" max="10" aria-label="Quantity">
+              <button id="qty-plus" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div class="product-cta">
+            <button class="s-btn s-btn--primary s-btn--full" id="add-to-cart-btn" style="padding:20px;">Add to Cart</button>
+          </div>
+
+          <p id="size-error" style="display:none;font-size:11px;letter-spacing:0.1em;color:var(--error);text-transform:uppercase;margin-top:8px;" role="alert">Please select a size</p>
+
+          <!-- Details Accordion -->
+          <div class="product-details" style="margin-top:var(--spacing-md);">
+            ${data.description ? `
+            <div class="s-accordion__item">
+              <button class="s-accordion__trigger" aria-expanded="false">Description<span class="s-accordion__icon" aria-hidden="true">+</span></button>
+              <div class="s-accordion__content" role="region"><div class="s-accordion__inner">${data.description}</div></div>
+            </div>` : ''}
+            ${data.materials ? `
+            <div class="s-accordion__item">
+              <button class="s-accordion__trigger" aria-expanded="false">Materials<span class="s-accordion__icon" aria-hidden="true">+</span></button>
+              <div class="s-accordion__content" role="region"><div class="s-accordion__inner">${data.materials}</div></div>
+            </div>` : ''}
+            ${data.care_instructions ? `
+            <div class="s-accordion__item">
+              <button class="s-accordion__trigger" aria-expanded="false">Care Instructions<span class="s-accordion__icon" aria-hidden="true">+</span></button>
+              <div class="s-accordion__content" role="region"><div class="s-accordion__inner">${data.care_instructions}</div></div>
+            </div>` : ''}
+            <div class="s-accordion__item">
+              <button class="s-accordion__trigger" aria-expanded="false">Shipping & Returns<span class="s-accordion__icon" aria-hidden="true">+</span></button>
+              <div class="s-accordion__content" role="region"><div class="s-accordion__inner">
+                <p>Free shipping on orders over $200. Standard delivery 3–7 business days.</p>
+                <p style="margin-top:12px;">Returns accepted within 14 days of delivery. Items must be unworn, unwashed, and in original packaging.</p>
+              </div></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Reviews -->
+      ${reviews.length ? `
+      <section class="product-reviews s-section" aria-label="Customer reviews">
+        <h2 class="s-subheading" style="margin-bottom:var(--spacing-md);" data-reveal>Reviews</h2>
+        <div class="reviews-grid">
+          ${reviews.slice(0, 6).map(r => `
+            <article class="review-card" data-reveal>
+              <div class="review-card__header">
+                <span class="review-card__name">${r.profiles?.full_name || 'Anonymous'}</span>
+                <div class="stars" aria-label="Rating: ${r.rating} out of 5">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+              </div>
+              <p class="review-card__text">${r.comment}</p>
+              <time class="review-card__date" datetime="${r.created_at}">${new Date(r.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</time>
+            </article>
+          `).join('')}
+        </div>
+      </section>` : ''}
+
+      <!-- Related Products -->
+      <section class="s-section" id="related-section" aria-label="Related products">
+        <div class="section-header" data-reveal>
+          <span class="s-eyebrow">You May Also Like</span>
+        </div>
+        <div class="product-grid" id="related-grid" role="list"></div>
+      </section>
+    </div>
+    `;
+
+    initAccordions();
+    initScrollReveal();
+    initGallery(images);
+    initSizeSelector(inventory);
+    initAddToCart();
+    initWishlist(data.id, inWishlist);
+    loadRelated(data.id, data.category_slug);
+  }
+
+  function initGallery(images) {
+    let current = 0;
+
+    function setImage(index) {
+      current = Math.max(0, Math.min(images.length - 1, index));
+      const mainImg = document.getElementById('main-image');
+      if (mainImg) mainImg.src = images[current].image_url;
+      document.querySelectorAll('.product-gallery__thumb').forEach((btn, i) => {
+        btn.classList.toggle('active', i === current);
+      });
+    }
+
+    document.querySelectorAll('.product-gallery__thumb').forEach((btn, i) => {
+      btn.addEventListener('click', () => setImage(i));
+    });
+
+    document.getElementById('prev-img')?.addEventListener('click', () => setImage(current - 1));
+    document.getElementById('next-img')?.addEventListener('click', () => setImage(current + 1));
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') setImage(current - 1);
+      if (e.key === 'ArrowRight') setImage(current + 1);
+    });
+
+    // Zoom
+    const zoomWrap = document.getElementById('zoom-wrap');
+    const mainImg = document.getElementById('main-image');
+    if (zoomWrap && mainImg) {
+      zoomWrap.addEventListener('mousemove', e => {
+        const rect = zoomWrap.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+        const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+        mainImg.style.transformOrigin = `${x}% ${y}%`;
+        mainImg.style.transform = 'scale(1.6)';
+      });
+      zoomWrap.addEventListener('mouseleave', () => {
+        mainImg.style.transform = 'scale(1)';
+      });
+    }
+  }
+
+  function initSizeSelector(inventory) {
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      if (btn.disabled) return;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSize = btn.dataset.size;
+        document.getElementById('size-error').style.display = 'none';
+      });
+    });
+  }
+
+  function initAddToCart() {
+    const qtyInput = document.getElementById('qty-input');
+    document.getElementById('qty-minus')?.addEventListener('click', () => {
+      if (qtyInput && parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
+    });
+    document.getElementById('qty-plus')?.addEventListener('click', () => {
+      if (qtyInput && parseInt(qtyInput.value) < 10) qtyInput.value = parseInt(qtyInput.value) + 1;
+    });
+
+    document.getElementById('add-to-cart-btn')?.addEventListener('click', () => {
+      if (!selectedSize) {
+        document.getElementById('size-error').style.display = 'block';
+        document.getElementById('size-grid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      const qty = parseInt(document.getElementById('qty-input')?.value || '1');
+      addToCart(product, selectedSize, qty);
+    });
+  }
+
+  function initWishlist(productId, initial) {
+    const btn = document.getElementById('wishlist-btn');
+    let active = initial;
+    btn?.addEventListener('click', async () => {
+      active = await toggleWishlist(productId);
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+      const svg = btn.querySelector('svg');
+      if (svg) svg.setAttribute('fill', active ? 'currentColor' : 'none');
+    });
+  }
+
+  async function loadRelated(productId, categorySlug) {
+    const { data } = await supabase
+      .from('products')
+      .select('id, name, slug, price, sale_price, product_images(image_url, is_primary)')
+      .eq('is_active', true)
+      .eq('category_slug', categorySlug)
+      .neq('id', productId)
+      .limit(4);
+
+    const grid = document.getElementById('related-grid');
+    if (!grid || !data?.length) {
+      document.getElementById('related-section').style.display = 'none';
+      return;
+    }
+
+    grid.innerHTML = data.map(p => {
+      const img = p.product_images?.find(i => i.is_primary)?.image_url || p.product_images?.[0]?.image_url || '';
+      return `
+      <article class="product-card" data-reveal role="listitem">
+        <div class="product-card__image-wrap">
+          <a href="/pages/product.html?slug=${p.slug}" aria-label="View ${p.name}">
+            ${img ? `<img src="${img}" alt="${p.name}" loading="lazy">` : ''}
+          </a>
+        </div>
+        <div class="product-card__info">
+          <a href="/pages/product.html?slug=${p.slug}"><h3 class="product-card__name">${p.name}</h3></a>
+          <div class="product-card__price">${formatPrice(p.sale_price || p.price)}</div>
+        </div>
+      </article>`;
+    }).join('');
+
+    initScrollReveal();
+  }
+
+  loadProduct();
+</script>
+
+</body>
+</html>
