@@ -1,0 +1,112 @@
+/* SILENT_ — Auth Pages */
+
+.auth-page {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+.auth-brand {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: var(--spacing-md);
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.auth-brand__logo {
+  font-size: 20px;
+  font-weight: 100;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-brand__logo span { opacity: 0.4; }
+
+.auth-brand__visual {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 60%, rgba(255,255,255,0.03) 0%, transparent 60%),
+    linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%);
+}
+
+.auth-brand__visual::before {
+  content: 'SILENT_';
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 100;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.08);
+}
+
+.auth-form-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.auth-form-inner {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-pw-toggle {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+.auth-pw-toggle:hover { color: #fff; }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: var(--spacing-sm) 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-link {
+  color: var(--text-secondary);
+  text-decoration: underline;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  transition: color var(--transition-fast);
+}
+.auth-link:hover { color: #fff; }
+
+.auth-switch {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-top: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-brand { display: none; }
+}
