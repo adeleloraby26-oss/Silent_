@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — SILENT_</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/profile.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+</head>
+<body>
+<div id="loader"><div class="loader-logo">SILENT<span>_</span></div><div class="loader-bar"></div></div>
+<div id="nav-root"></div>
+
+<main style="padding-top:var(--nav-height);min-height:100vh;">
+  <div class="profile-layout s-section">
+
+    <!-- Sidebar -->
+    <aside class="profile-sidebar" aria-label="Account navigation">
+      <div class="profile-avatar" id="profile-avatar" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.75"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <p class="profile-name" id="profile-name">Loading...</p>
+      <p class="profile-email" id="profile-email"></p>
+
+      <nav class="profile-nav" aria-label="Profile sections">
+        <a href="#overview" class="profile-nav__link active" data-section="overview">Overview</a>
+        <a href="#orders" class="profile-nav__link" data-section="orders">Orders</a>
+        <a href="#wishlist" class="profile-nav__link" data-section="wishlist">Wishlist</a>
+        <a href="#addresses" class="profile-nav__link" data-section="addresses">Addresses</a>
+        <a href="#settings" class="profile-nav__link" data-section="settings">Settings</a>
+        <button id="signout-btn" class="profile-nav__link profile-nav__signout">Sign Out</button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="profile-content">
+
+      <!-- Overview -->
+      <section class="profile-section active" id="section-overview" aria-label="Account overview">
+        <h2 class="profile-section__title">Overview</h2>
+        <div class="profile-stats" id="profile-stats">
+          <div class="profile-stat">
+            <span class="profile-stat__val" id="stat-orders">—</span>
+            <span class="profile-stat__label">Orders</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__val" id="stat-wishlist">—</span>
+            <span class="profile-stat__label">Wishlist</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__val" id="stat-spent">—</span>
+            <span class="profile-stat__label">Total Spent</span>
+          </div>
+        </div>
+        <div class="profile-recent-orders" id="recent-orders">
+          <h3 class="profile-subsection-title">Recent Orders</h3>
+          <div id="recent-orders-list"></div>
+        </div>
+      </section>
+
+      <!-- Orders -->
+      <section class="profile-section" id="section-orders" aria-label="Order history">
+        <h2 class="profile-section__title">Orders</h2>
+        <div id="orders-list"></div>
+      </section>
+
+      <!-- Wishlist -->
+      <section class="profile-section" id="section-wishlist" aria-label="Wishlist">
+        <h2 class="profile-section__title">Wishlist</h2>
+        <div class="product-grid" id="wishlist-grid" role="list"></div>
+        <div id="wishlist-empty" style="display:none;text-align:center;padding:var(--spacing-lg);">
+          <p class="s-body">Your wishlist is empty.</p>
+          <a href="/pages/shop.html" class="s-btn" style="margin-top:24px;">Browse Products</a>
+        </div>
+      </section>
+
+      <!-- Addresses -->
+      <section class="profile-section" id="section-addresses" aria-label="Saved addresses">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--spacing-md);">
+          <h2 class="profile-section__title" style="margin:0;">Addresses</h2>
+          <button class="s-btn" id="add-address-btn" style="padding:12px 24px;font-size:10px;">+ Add Address</button>
+        </div>
+        <div id="addresses-list"></div>
+        <div id="address-form" style="display:none;" class="address-form-box">
+          <!-- Address form populated by JS -->
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="profile-section" id="section-settings" aria-label="Account settings">
+        <h2 class="profile-section__title">Settings</h2>
+        <div class="settings-grid">
+          <div class="settings-block">
+            <h3 class="profile-subsection-title">Personal Information</h3>
+            <div class="s-field"><label for="s-first-name">First Name</label><input type="text" id="s-first-name" class="s-input"></div>
+            <div class="s-field" style="margin-top:16px;"><label for="s-last-name">Last Name</label><input type="text" id="s-last-name" class="s-input"></div>
+            <div class="s-field" style="margin-top:16px;"><label for="s-email">Email</label><input type="email" id="s-email" class="s-input" disabled></div>
+            <div class="s-field" style="margin-top:16px;"><label for="s-phone">Phone</label><input type="tel" id="s-phone" class="s-input" placeholder="+1 000 000 0000"></div>
+            <button class="s-btn s-btn--primary" style="padding:16px 32px;margin-top:24px;" id="save-profile-btn">Save Changes</button>
+            <p id="profile-save-msg" style="display:none;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-top:12px;"></p>
+          </div>
+          <div class="settings-block">
+            <h3 class="profile-subsection-title">Change Password</h3>
+            <div class="s-field"><label for="new-pw">New Password</label><input type="password" id="new-pw" class="s-input" placeholder="Min 8 characters"></div>
+            <div class="s-field" style="margin-top:16px;"><label for="confirm-pw">Confirm Password</label><input type="password" id="confirm-pw" class="s-input" placeholder="Repeat password"></div>
+            <button class="s-btn" style="padding:16px 32px;margin-top:24px;" id="change-pw-btn">Update Password</button>
+            <p id="pw-msg" style="display:none;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-top:12px;"></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div id="footer-root"></div>
+
+<script type="module">
+  import { renderNav, renderFooter } from '/assets/js/components.js';
+  import { initNav, initCart, initSearch, loadSiteSettings } from '/assets/js/nav.js';
+  import { initCursor, initLoadingScreen, initPageTransitions, formatPrice, toast } from '/assets/js/utils.js';
+  import { supabase, requireAuth } from '/assets/js/supabase.js';
+  import { getWishlist } from '/assets/js/wishlist.js';
+
+  document.getElementById('nav-root').innerHTML = renderNav('');
+  loadSiteSettings().then(s => document.getElementById('footer-root').innerHTML = renderFooter(s));
+  initLoadingScreen(); initCursor(); initPageTransitions(); initNav(); initCart(); initSearch();
+
+  const user = await requireAuth('/auth/login.html?redirect=/auth/profile.html');
+  if (!user) throw new Error('Not authenticated');
+
+  // Load profile
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  const fullName = profile?.full_name || user.email.split('@')[0];
+  document.getElementById('profile-name').textContent = fullName;
+  document.getElementById('profile-email').textContent = user.email;
+
+  // Populate settings
+  const nameParts = fullName.split(' ');
+  document.getElementById('s-first-name').value = nameParts[0] || '';
+  document.getElementById('s-last-name').value = nameParts.slice(1).join(' ') || '';
+  document.getElementById('s-email').value = user.email;
+  document.getElementById('s-phone').value = profile?.phone || '';
+
+  // Section navigation
+  document.querySelectorAll('.profile-nav__link[data-section]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const section = link.dataset.section;
+      document.querySelectorAll('.profile-nav__link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+      link.classList.add('active');
+      document.getElementById(`section-${section}`)?.classList.add('active');
+      loadSection(section);
+    });
+  });
+
+  // Sign out
+  document.getElementById('signout-btn')?.addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/index.html';
+  });
+
+  async function loadSection(section) {
+    if (section === 'overview' || section === 'orders') await loadOrders(section);
+    if (section === 'wishlist') await loadWishlist();
+    if (section === 'addresses') await loadAddresses();
+  }
+
+  // Load orders
+  async function loadOrders(section) {
+    const { data: orders } = await supabase
+      .from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+
+    if (!orders) return;
+
+    const totalSpent = orders.reduce((s, o) => s + (o.total || 0), 0);
+    document.getElementById('stat-orders').textContent = orders.length;
+    document.getElementById('stat-spent').textContent = formatPrice(totalSpent);
+
+    const html = orders.length ? orders.map(o => `
+      <div class="order-row">
+        <div class="order-row__id">#${o.id.slice(0,8).toUpperCase()}</div>
+        <div class="order-row__date">${new Date(o.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+        <div class="order-row__status order-status--${o.status}">${o.status}</div>
+        <div class="order-row__total">${formatPrice(o.total)}</div>
+        <a href="/pages/order-confirmation.html?id=${o.id}" class="s-btn" style="padding:10px 20px;font-size:10px;">View</a>
+      </div>
+    `).join('') : '<p class="s-body" style="padding:var(--spacing-md) 0;">No orders yet.</p>';
+
+    if (section === 'orders') document.getElementById('orders-list').innerHTML = html;
+    const recentEl = document.getElementById('recent-orders-list');
+    if (recentEl) recentEl.innerHTML = orders.slice(0,3).length ? orders.slice(0,3).map(o => `
+      <div class="order-row">
+        <div class="order-row__id">#${o.id.slice(0,8).toUpperCase()}</div>
+        <div class="order-row__date">${new Date(o.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+        <div class="order-row__status order-status--${o.status}">${o.status}</div>
+        <div class="order-row__total">${formatPrice(o.total)}</div>
+      </div>
+    `).join('') : '<p class="s-body">No orders yet.</p>';
+  }
+
+  // Load wishlist
+  async function loadWishlist() {
+    const items = await getWishlist();
+    const grid = document.getElementById('wishlist-grid');
+    const empty = document.getElementById('wishlist-empty');
+    document.getElementById('stat-wishlist').textContent = items.length;
+
+    if (!items.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    grid.innerHTML = items.map(item => {
+      const p = item.products || item;
+      return `
+      <article class="product-card" role="listitem">
+        <div class="product-card__image-wrap">
+          <a href="/pages/product.html?slug=${p.slug}">
+            <div style="width:100%;height:100%;background:var(--bg-elevated);"></div>
+          </a>
+        </div>
+        <div class="product-card__info">
+          <a href="/pages/product.html?slug=${p.slug}"><h3 class="product-card__name">${p.name}</h3></a>
+          <div class="product-card__price">${formatPrice(p.sale_price || p.price)}</div>
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  // Load addresses
+  async function loadAddresses() {
+    const { data } = await supabase.from('addresses').select('*').eq('user_id', user.id);
+    const listEl = document.getElementById('addresses-list');
+    listEl.innerHTML = data?.length ? data.map(addr => `
+      <div class="address-card">
+        <div class="address-card__info">
+          <p class="address-card__name">${addr.first_name} ${addr.last_name}</p>
+          <p class="address-card__addr">${addr.address}, ${addr.city}, ${addr.state} ${addr.zip}, ${addr.country}</p>
+          ${addr.phone ? `<p class="address-card__phone">${addr.phone}</p>` : ''}
+        </div>
+        <div class="address-card__actions">
+          ${addr.is_default ? '<span class="address-default-badge">Default</span>' : `<button class="s-btn" style="padding:8px 16px;font-size:10px;" data-set-default="${addr.id}">Set Default</button>`}
+          <button class="s-btn" style="padding:8px 16px;font-size:10px;" data-delete="${addr.id}">Delete</button>
+        </div>
+      </div>
+    `).join('') : '<p class="s-body">No saved addresses.</p>';
+
+    listEl.querySelectorAll('[data-delete]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await supabase.from('addresses').delete().eq('id', btn.dataset.delete);
+        loadAddresses();
+      });
+    });
+    listEl.querySelectorAll('[data-set-default]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await supabase.from('addresses').update({ is_default: false }).eq('user_id', user.id);
+        await supabase.from('addresses').update({ is_default: true }).eq('id', btn.dataset.setDefault);
+        loadAddresses();
+      });
+    });
+  }
+
+  // Save profile
+  document.getElementById('save-profile-btn')?.addEventListener('click', async () => {
+    const first = document.getElementById('s-first-name').value.trim();
+    const last = document.getElementById('s-last-name').value.trim();
+    const phone = document.getElementById('s-phone').value.trim();
+    const msg = document.getElementById('profile-save-msg');
+
+    const { error } = await supabase.from('profiles').upsert({
+      id: user.id, full_name: `${first} ${last}`, phone, updated_at: new Date().toISOString()
+    });
+
+    msg.style.display = 'block';
+    if (error) { msg.style.color = 'var(--error)'; msg.textContent = 'Error saving profile.'; }
+    else { msg.style.color = 'var(--success)'; msg.textContent = 'Profile updated.'; }
+  });
+
+  // Change password
+  document.getElementById('change-pw-btn')?.addEventListener('click', async () => {
+    const newPw = document.getElementById('new-pw').value;
+    const confirmPw = document.getElementById('confirm-pw').value;
+    const msg = document.getElementById('pw-msg');
+
+    if (newPw !== confirmPw) {
+      msg.style.color = 'var(--error)'; msg.textContent = 'Passwords do not match.'; msg.style.display = 'block'; return;
+    }
+    if (newPw.length < 8) {
+      msg.style.color = 'var(--error)'; msg.textContent = 'Min 8 characters.'; msg.style.display = 'block'; return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    msg.style.display = 'block';
+    if (error) { msg.style.color = 'var(--error)'; msg.textContent = error.message; }
+    else { msg.style.color = 'var(--success)'; msg.textContent = 'Password updated.'; document.getElementById('new-pw').value = ''; document.getElementById('confirm-pw').value = ''; }
+  });
+
+  // Initial load
+  loadSection('overview');
+</script>
+</body>
+</html>
